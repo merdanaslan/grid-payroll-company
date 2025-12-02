@@ -209,7 +209,8 @@ class GridPayrollDemo {
 
         this.console.printSuccess(`${type === 'signup' ? 'Account created' : 'Logged in'} successfully!`);
         
-        // Account creation/login completed - no need to show details here since it's shown above
+        // Automatically display smart account details after successful authentication
+        await this.showSmartAccountInfo();
         break;
         
       } catch (error) {
@@ -231,25 +232,17 @@ class GridPayrollDemo {
     while (true) {
       this.console.printSeparator();
       this.console.printMenu([
-        'View Account Information (✅ Working)',
-        'View Smart Account Details (✅ Working)',
         'View Account Balance (⚠️ Not implemented)',
         'Exit'
       ]);
 
-      const choice = await this.console.question('Enter your choice (1-4): ');
+      const choice = await this.console.question('Enter your choice (1-2): ');
 
       switch (choice) {
         case '1':
-          await this.showAccountInfo();
-          break;
-        case '2':
-          await this.showSmartAccountInfo();
-          break;
-        case '3':
           await this.showAccountBalance();
           break;
-        case '4':
+        case '2':
           this.console.printInfo('Goodbye!');
           return;
         default:
@@ -258,18 +251,6 @@ class GridPayrollDemo {
     }
   }
 
-  private async showAccountInfo(): Promise<void> {
-    if (this.authResult) {
-      this.console.printSuccess('✅ Account authenticated successfully!');
-      this.console.printInfo('Raw Grid SDK authentication data:');
-      console.log(JSON.stringify(this.authResult, null, 2));
-    } else {
-      this.console.printError('❌ No authenticated account found.');
-      this.console.printInfo('Please complete the login or signup process first.');
-    }
-
-    await this.console.question('Press Enter to continue...');
-  }
 
   private async showSmartAccountInfo(): Promise<void> {
     if (!this.authResult || !this.authResult.data) {
