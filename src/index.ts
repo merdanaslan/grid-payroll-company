@@ -1,7 +1,7 @@
 import { GridClient } from '@sqds/grid';
 import dotenv from 'dotenv';
-import ConsoleHelper from './utils/console.js';
-import { FreelancerAccount } from './types/index.js';
+import ConsoleHelper from './utils/console';
+import { FreelancerAccount } from './types/index';
 
 dotenv.config();
 
@@ -232,7 +232,7 @@ class GridPayrollDemo {
       this.console.printSeparator();
       this.console.printMenu([
         'View Account Information (✅ Working)',
-        'View Smart Account Details (⚠️ Not implemented)',
+        'View Smart Account Details (✅ Working)',
         'View Account Balance (⚠️ Not implemented)',
         'Exit'
       ]);
@@ -272,10 +272,63 @@ class GridPayrollDemo {
   }
 
   private async showSmartAccountInfo(): Promise<void> {
-    this.console.printWarning('Smart account details feature not implemented yet.');
-    this.console.printInfo('This will show detailed account info including signers, permissions, and policies.');
-    
-    await this.console.question('Press Enter to continue...');
+    if (!this.authResult || !this.authResult.data) {
+      this.console.printError('❌ No authenticated account found.');
+      this.console.printInfo('Please complete the login or signup process first.');
+      await this.console.question('Press Enter to continue...');
+      return;
+    }
+
+    try {
+      this.console.printSeparator();
+      this.console.printInfo('📋 Smart Account Details');
+      this.console.printSeparator();
+
+      const accountData = this.authResult.data;
+
+      // Display wallet address
+      this.console.printSuccess(`🏦 Smart Account Address: ${accountData.address}`);
+      this.console.printSeparator();
+
+      // Fetch additional account details using getAccount()
+      this.console.printInfo('🔍 Calling Grid SDK: getAccount() for comprehensive details...');
+      const accountDetailsResponse = await this.gridClient.getAccount(accountData.address);
+      
+      console.log('\n=== GRID SDK RESPONSE: getAccount ===');
+      console.log(JSON.stringify(accountDetailsResponse, null, 2));
+      console.log('=== END RESPONSE ===\n');
+
+      // Display ownership and permissions from auth data
+      if (accountData.policies && accountData.policies.signers) {
+        this.console.printInfo('👥 Account Ownership & Permissions:');
+        
+        accountData.policies.signers.forEach((signer: any, index: number) => {
+          this.console.printInfo(`\n${index + 1}. ${signer.role.toUpperCase()} SIGNER:`);
+          this.console.printInfo(`   Address: ${signer.address}`);
+          this.console.printInfo(`   Provider: ${signer.provider}`);
+          this.console.printInfo(`   Permissions: ${signer.permissions.join(', ')}`);
+        });
+
+        this.console.printSeparator();
+        
+        // Display account policies
+        this.console.printInfo('🔒 Account Policies:');
+        this.console.printInfo(`   Signature Threshold: ${accountData.policies.threshold}`);
+        this.console.printInfo(`   Time Lock: ${accountData.policies.time_lock || 'None'}`);
+        this.console.printInfo(`   Admin Address: ${accountData.policies.admin_address || 'None'}`);
+        
+        // Grid User ID
+        this.console.printInfo(`\n🆔 Grid User ID: ${accountData.grid_user_id}`);
+        
+      } else {
+        this.console.printWarning('⚠️ No policy data found in authentication response.');
+      }
+
+    } catch (error) {
+      this.console.printError(`Failed to fetch account details: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+
+    await this.console.question('\nPress Enter to continue...');
   }
 
   private async showAccountBalance(): Promise<void> {
