@@ -10,6 +10,7 @@ class GridPayrollDemo {
   private console: ConsoleHelper;
   private authResult: any = null;
   private tempSessionData: any = null;
+  private sessionSecrets: any = null;
 
   constructor() {
     // Initialize Grid SDK client directly (following quickstart example)
@@ -203,8 +204,9 @@ class GridPayrollDemo {
           console.log('=== END RESPONSE ===\n');
         }
 
-        // Store auth result in memory
+        // Store auth result and session secrets for transaction signing
         this.authResult = authResult;
+        this.sessionSecrets = this.tempSessionData?.sessionSecrets;
         this.tempSessionData = null;
 
         this.console.printSuccess(`${type === 'signup' ? 'Account created' : 'Logged in'} successfully!`);
@@ -233,16 +235,28 @@ class GridPayrollDemo {
       this.console.printSeparator();
       this.console.printMenu([
         'View Account Balance (✅ Working)',
+        'View Spending Limits (✅ Working)',
+        'Create Spending Limit (✅ Working)',
+        'Update Account Settings (✅ Working)',
         'Exit'
       ]);
 
-      const choice = await this.console.question('Enter your choice (1-2): ');
+      const choice = await this.console.question('Enter your choice (1-5): ');
 
       switch (choice) {
         case '1':
           await this.showAccountBalance();
           break;
         case '2':
+          await this.showSpendingLimits();
+          break;
+        case '3':
+          await this.createSpendingLimit();
+          break;
+        case '4':
+          await this.updateAccountPolicies();
+          break;
+        case '5':
           this.console.printInfo('Goodbye!');
           return;
         default:
@@ -365,6 +379,266 @@ class GridPayrollDemo {
 
     } catch (error) {
       this.console.printError(`Failed to fetch account balance: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+
+    await this.console.question('\nPress Enter to continue...');
+  }
+
+  private async showSpendingLimits(): Promise<void> {
+    if (!this.authResult || !this.authResult.data) {
+      this.console.printError('❌ No authenticated account found.');
+      this.console.printInfo('Please complete the login or signup process first.');
+      await this.console.question('Press Enter to continue...');
+      return;
+    }
+
+    try {
+      this.console.printSeparator();
+      this.console.printInfo('🚦 Spending Limits');
+      this.console.printSeparator();
+
+      const accountAddress = this.authResult.data.address;
+      this.console.printSuccess(`🏦 Account: ${accountAddress}`);
+
+      // Fetch spending limits using Grid SDK
+      this.console.printInfo('🔍 Calling Grid SDK: getSpendingLimits()');
+      const spendingLimitsResponse = await this.gridClient.getSpendingLimits(accountAddress);
+      
+      console.log('\n=== GRID SDK RESPONSE: getSpendingLimits ===');
+      console.log(JSON.stringify(spendingLimitsResponse, null, 2));
+      console.log('=== END RESPONSE ===\n');
+
+      const spendingLimits = spendingLimitsResponse.data;
+
+      if (spendingLimits && spendingLimits.length > 0) {
+        this.console.printInfo(`📋 Found ${spendingLimits.length} spending limit(s):`);
+        
+        spendingLimits.forEach((limit: any, index: number) => {
+          this.console.printInfo(`\n${index + 1}. Spending Limit:`);
+          this.console.printInfo(`   Address: ${limit.address}`);
+          this.console.printInfo(`   Token Mint: ${limit.mint}`);
+          this.console.printInfo(`   Amount: ${limit.amount}`);
+          this.console.printInfo(`   Remaining: ${limit.remaining_amount}`);
+          
+          const periodTypes = ['One-time', 'Daily', 'Weekly', 'Monthly'];
+          this.console.printInfo(`   Period: ${periodTypes[limit.period] || 'Unknown'}`);
+          this.console.printInfo(`   Status: ${limit.status}`);
+          
+          if (limit.destinations && limit.destinations.length > 0) {
+            this.console.printInfo(`   Allowed destinations: ${limit.destinations.length}`);
+          }
+          
+          if (limit.signers && limit.signers.length > 0) {
+            this.console.printInfo(`   Authorized signers (${limit.signers.length}):`);
+            limit.signers.forEach((signerAddress: string, signerIndex: number) => {
+              // Try to match this signer address with our account signers to get provider info
+              const accountSigner = this.authResult.data.policies.signers.find(
+                (accountSigner: any) => accountSigner.address === signerAddress
+              );
+              
+              if (accountSigner) {
+                this.console.printInfo(`     ${signerIndex + 1}. ${signerAddress} (${accountSigner.provider} - ${accountSigner.role})`);
+              } else {
+                this.console.printInfo(`     ${signerIndex + 1}. ${signerAddress} (Unknown provider)`);
+              }
+            });
+          }
+        });
+      } else {
+        this.console.printInfo('📋 No spending limits configured for this account');
+        this.console.printInfo('Use "Create Spending Limit" to set up spending controls');
+      }
+
+    } catch (error) {
+      this.console.printError(`Failed to fetch spending limits: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+
+    await this.console.question('\nPress Enter to continue...');
+  }
+
+  private async createSpendingLimit(): Promise<void> {
+    if (!this.authResult || !this.authResult.data) {
+      this.console.printError('❌ No authenticated account found.');
+      this.console.printInfo('Please complete the login or signup process first.');
+      await this.console.question('Press Enter to continue...');
+      return;
+    }
+
+    try {
+      this.console.printSeparator();
+      this.console.printInfo('➕ Create New Spending Limit');
+      this.console.printSeparator();
+
+      const accountAddress = this.authResult.data.address;
+      this.console.printSuccess(`🏦 Account: ${accountAddress}`);
+
+      // Collect spending limit parameters
+      const amount = await this.console.question('Enter spending limit amount: ');
+      
+      this.console.printInfo('\nToken options:');
+      this.console.printInfo('1. USDC (recommended for payroll)');
+      this.console.printInfo('2. SOL');
+      this.console.printInfo('3. Custom token mint address');
+      
+      const tokenChoice = await this.console.question('Select token type (1-3): ');
+      let mint = '';
+      
+      switch (tokenChoice) {
+        case '1':
+          mint = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v'; // USDC mint on mainnet
+          break;
+        case '2':
+          mint = 'So11111111111111111111111111111111111111112'; // Wrapped SOL
+          break;
+        case '3':
+          mint = await this.console.question('Enter token mint address: ');
+          break;
+        default:
+          this.console.printError('Invalid choice. Defaulting to USDC.');
+          mint = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v';
+      }
+
+      this.console.printInfo('\nPeriod options:');
+      this.console.printInfo('0. One-time');
+      this.console.printInfo('1. Daily');
+      this.console.printInfo('2. Weekly'); 
+      this.console.printInfo('3. Monthly');
+      
+      const periodChoice = await this.console.question('Select period (0-3): ');
+      const periodIndex = parseInt(periodChoice) || 1; // Default to daily
+      
+      // Map numeric choice to lowercase string values
+      const periodValues = ['one_time', 'daily', 'weekly', 'monthly'];
+      const period = periodValues[periodIndex] || 'daily';
+
+      // Create spending limit request
+      const spendingLimitRequest = {
+        amount: parseFloat(amount) || 0,
+        mint: mint,
+        period: period as any, // Cast to SpendingLimitPeriod type
+        spending_limit_signers: [this.authResult.data.policies.signers[0].address] // Use primary signer by default
+      };
+
+      this.console.printInfo('🔍 Calling Grid SDK: createSpendingLimit()');
+      const createResponse = await this.gridClient.createSpendingLimit(accountAddress, spendingLimitRequest);
+      
+      console.log('\n=== GRID SDK RESPONSE: createSpendingLimit ===');
+      console.log(JSON.stringify(createResponse, null, 2));
+      console.log('=== END RESPONSE ===\n');
+
+      // Immediately sign and submit the transaction to deploy the spending limit (no user interaction)
+      this.console.printInfo('🔍 Calling Grid SDK: signAndSend() to deploy spending limit');
+      
+      // Debug: Log the parameters we're passing to signAndSend
+      console.log('\n=== DEBUG: signAndSend PARAMETERS ===');
+      console.log('sessionSecrets:', JSON.stringify(this.sessionSecrets, null, 2));
+      console.log('session (authResult.data.authentication):', JSON.stringify(this.authResult.data.authentication, null, 2));
+      console.log('transactionPayload:', JSON.stringify(createResponse.data, null, 2));
+      console.log('address:', accountAddress);
+      console.log('=== END DEBUG ===\n');
+      
+      const signature = await this.gridClient.signAndSend({
+        sessionSecrets: this.sessionSecrets,
+        session: this.authResult.data.authentication,
+        transactionPayload: createResponse.data,
+        address: accountAddress
+      });
+
+      console.log('\n=== GRID SDK RESPONSE: signAndSend ===');
+      console.log(JSON.stringify(signature, null, 2));
+      console.log('=== END RESPONSE ===\n');
+
+      this.console.printSuccess('✅ Spending limit created and deployed successfully!');
+      this.console.printInfo(`💰 Amount: ${amount}`);
+      this.console.printInfo(`🪙 Token: ${mint}`);
+      this.console.printInfo(`📅 Period: ${['One-time', 'Daily', 'Weekly', 'Monthly'][periodIndex]}`);
+      
+      if (createResponse.data && createResponse.data.spending_limit_address) {
+        this.console.printInfo(`🔗 Spending Limit Address: ${createResponse.data.spending_limit_address}`);
+      }
+
+      if (signature && signature.data && signature.data.transaction_signature) {
+        this.console.printSuccess(`📝 Transaction Signature: ${signature.data.transaction_signature}`);
+      }
+
+    } catch (error) {
+      this.console.printError(`Failed to create spending limit: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+
+    await this.console.question('\nPress Enter to continue...');
+  }
+
+  private async updateAccountPolicies(): Promise<void> {
+    if (!this.authResult || !this.authResult.data) {
+      this.console.printError('❌ No authenticated account found.');
+      this.console.printInfo('Please complete the login or signup process first.');
+      await this.console.question('Press Enter to continue...');
+      return;
+    }
+
+    try {
+      this.console.printSeparator();
+      this.console.printInfo('⚙️ Update Account Policies');
+      this.console.printSeparator();
+
+      const accountAddress = this.authResult.data.address;
+      this.console.printSuccess(`🏦 Account: ${accountAddress}`);
+
+      // Show current policies
+      const currentPolicies = this.authResult.data.policies;
+      this.console.printInfo('\nCurrent Settings:');
+      this.console.printInfo(`   Signature Threshold: ${currentPolicies.threshold}`);
+      this.console.printInfo(`   Time Lock: ${currentPolicies.time_lock || 'None'}`);
+
+      this.console.printInfo('\nWhat would you like to update?');
+      this.console.printInfo('1. Signature Threshold');
+      this.console.printInfo('2. Time Lock');
+      this.console.printInfo('3. Both');
+      
+      const updateChoice = await this.console.question('Select option (1-3): ');
+      
+      const updateRequest: any = {};
+
+      if (updateChoice === '1' || updateChoice === '3') {
+        const newThreshold = await this.console.question(`Enter new signature threshold (current: ${currentPolicies.threshold}): `);
+        const threshold = parseInt(newThreshold);
+        if (threshold >= 1 && threshold <= 10) {
+          updateRequest.threshold = threshold;
+        } else {
+          this.console.printError('Threshold must be between 1 and 10.');
+          return;
+        }
+      }
+
+      if (updateChoice === '2' || updateChoice === '3') {
+        const timeLockInput = await this.console.question('Enter time lock in seconds (0 for no lock): ');
+        const timeLock = parseInt(timeLockInput);
+        if (timeLock >= 0) {
+          updateRequest.time_lock = timeLock === 0 ? null : timeLock;
+        } else {
+          this.console.printError('Time lock must be 0 or positive number.');
+          return;
+        }
+      }
+
+      if (Object.keys(updateRequest).length === 0) {
+        this.console.printWarning('No changes specified.');
+        await this.console.question('Press Enter to continue...');
+        return;
+      }
+
+      this.console.printInfo('🔍 Calling Grid SDK: updateAccount()');
+      const updateResponse = await this.gridClient.updateAccount(accountAddress, updateRequest);
+      
+      console.log('\n=== GRID SDK RESPONSE: updateAccount ===');
+      console.log(JSON.stringify(updateResponse, null, 2));
+      console.log('=== END RESPONSE ===\n');
+
+      this.console.printSuccess('✅ Account policy update initiated!');
+      this.console.printInfo('Changes will take effect after transaction confirmation.');
+
+    } catch (error) {
+      this.console.printError(`Failed to update account policies: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
 
     await this.console.question('\nPress Enter to continue...');
