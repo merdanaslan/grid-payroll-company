@@ -232,7 +232,7 @@ class GridPayrollDemo {
     while (true) {
       this.console.printSeparator();
       this.console.printMenu([
-        'View Account Balance (⚠️ Not implemented)',
+        'View Account Balance (✅ Working)',
         'Exit'
       ]);
 
@@ -313,10 +313,61 @@ class GridPayrollDemo {
   }
 
   private async showAccountBalance(): Promise<void> {
-    this.console.printWarning('Account balance feature not implemented yet.');
-    this.console.printInfo('This will show USDC/SOL balances using Grid SDK getAccountBalances() method.');
-    
-    await this.console.question('Press Enter to continue...');
+    if (!this.authResult || !this.authResult.data) {
+      this.console.printError('❌ No authenticated account found.');
+      this.console.printInfo('Please complete the login or signup process first.');
+      await this.console.question('Press Enter to continue...');
+      return;
+    }
+
+    try {
+      this.console.printSeparator();
+      this.console.printInfo('💰 Account Balance');
+      this.console.printSeparator();
+
+      const accountAddress = this.authResult.data.address;
+      this.console.printSuccess(`🏦 Account: ${accountAddress}`);
+
+      // Fetch account balances using Grid SDK
+      this.console.printInfo('🔍 Calling Grid SDK: getAccountBalances()');
+      const balanceResponse = await this.gridClient.getAccountBalances(accountAddress);
+      
+      console.log('\n=== GRID SDK RESPONSE: getAccountBalances ===');
+      console.log(JSON.stringify(balanceResponse, null, 2));
+      console.log('=== END RESPONSE ===\n');
+
+      const balanceData = balanceResponse.data;
+
+      // Display SOL balance
+      this.console.printInfo('💎 SOL Balance:');
+      this.console.printInfo(`   Lamports: ${balanceData.lamports.toString()}`);
+      this.console.printInfo(`   SOL: ${balanceData.sol} SOL`);
+
+      // Display token balances
+      this.console.printSeparator();
+      if (balanceData.tokens && balanceData.tokens.length > 0) {
+        this.console.printInfo('🪙 Token Balances:');
+        balanceData.tokens.forEach((token: any, index: number) => {
+          this.console.printInfo(`\n${index + 1}. Token:`);
+          this.console.printInfo(`   Mint: ${token.mint || 'Unknown'}`);
+          this.console.printInfo(`   Amount: ${token.amount || '0'}`);
+          this.console.printInfo(`   Decimals: ${token.decimals || 'Unknown'}`);
+          this.console.printInfo(`   Symbol: ${token.symbol || 'Unknown'}`);
+          
+          // Highlight USDC specifically for payroll context
+          if (token.symbol === 'USDC' || token.mint?.includes('USDC')) {
+            this.console.printSuccess(`   💵 USDC Balance: ${token.amount || '0'} USDC`);
+          }
+        });
+      } else {
+        this.console.printInfo('🪙 Token Balances: No tokens found');
+      }
+
+    } catch (error) {
+      this.console.printError(`Failed to fetch account balance: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+
+    await this.console.question('\nPress Enter to continue...');
   }
 
 
