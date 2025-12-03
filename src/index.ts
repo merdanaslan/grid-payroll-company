@@ -237,7 +237,7 @@ class GridPayrollDemo {
         'View Account Balance (✅ Working)',
         'View Spending Limits (✅ Working)',
         'Create Spending Limit (✅ Working)',
-        'Update Account Settings (✅ Working)',
+        'Update Signature Threshold (✅ Working)',
         'Exit'
       ]);
 
@@ -254,7 +254,7 @@ class GridPayrollDemo {
           await this.createSpendingLimit();
           break;
         case '4':
-          await this.updateAccountPolicies();
+          await this.updateSignatureThreshold();
           break;
         case '5':
           this.console.printInfo('Goodbye!');
@@ -568,7 +568,7 @@ class GridPayrollDemo {
     await this.console.question('\nPress Enter to continue...');
   }
 
-  private async updateAccountPolicies(): Promise<void> {
+  private async updateSignatureThreshold(): Promise<void> {
     if (!this.authResult || !this.authResult.data) {
       this.console.printError('❌ No authenticated account found.');
       this.console.printInfo('Please complete the login or signup process first.');
@@ -578,54 +578,64 @@ class GridPayrollDemo {
 
     try {
       this.console.printSeparator();
-      this.console.printInfo('⚙️ Update Account Policies');
+      this.console.printInfo('🔧 Update Signature Threshold');
       this.console.printSeparator();
 
       const accountAddress = this.authResult.data.address;
       this.console.printSuccess(`🏦 Account: ${accountAddress}`);
 
-      // Show current policies
+      // Show current threshold and signer information
       const currentPolicies = this.authResult.data.policies;
-      this.console.printInfo('\nCurrent Settings:');
-      this.console.printInfo(`   Signature Threshold: ${currentPolicies.threshold}`);
-      this.console.printInfo(`   Time Lock: ${currentPolicies.time_lock || 'None'}`);
+      const currentThreshold = currentPolicies.threshold;
+      const signerCount = currentPolicies.signers ? currentPolicies.signers.length : 0;
 
-      this.console.printInfo('\nWhat would you like to update?');
-      this.console.printInfo('1. Signature Threshold');
-      this.console.printInfo('2. Time Lock');
-      this.console.printInfo('3. Both');
-      
-      const updateChoice = await this.console.question('Select option (1-3): ');
-      
-      const updateRequest: any = {};
+      this.console.printInfo('\nCurrent Account Configuration:');
+      this.console.printInfo(`   📊 Signature Threshold: ${currentThreshold}`);
+      this.console.printInfo(`   👥 Total Signers: ${signerCount}`);
+      this.console.printInfo(`   ℹ️  Currently requires ${currentThreshold} out of ${signerCount} signatures for transactions`);
 
-      if (updateChoice === '1' || updateChoice === '3') {
-        const newThreshold = await this.console.question(`Enter new signature threshold (current: ${currentPolicies.threshold}): `);
-        const threshold = parseInt(newThreshold);
-        if (threshold >= 1 && threshold <= 10) {
-          updateRequest.threshold = threshold;
-        } else {
-          this.console.printError('Threshold must be between 1 and 10.');
-          return;
-        }
+      // Get new threshold from user
+      this.console.printSeparator();
+      const newThreshold = await this.console.question(`Enter new signature threshold (1-${signerCount}, current: ${currentThreshold}): `);
+      const threshold = parseInt(newThreshold);
+      
+      // Enhanced validation
+      if (isNaN(threshold) || threshold < 1) {
+        this.console.printError('Threshold must be at least 1.');
+        return;
+      }
+      
+      if (threshold > signerCount) {
+        this.console.printError(`Threshold cannot exceed the number of signers (${signerCount}).`);
+        this.console.printInfo('Add more signers to the account before increasing the threshold.');
+        return;
       }
 
-      if (updateChoice === '2' || updateChoice === '3') {
-        const timeLockInput = await this.console.question('Enter time lock in seconds (0 for no lock): ');
-        const timeLock = parseInt(timeLockInput);
-        if (timeLock >= 0) {
-          updateRequest.time_lock = timeLock === 0 ? null : timeLock;
-        } else {
-          this.console.printError('Time lock must be 0 or positive number.');
-          return;
-        }
-      }
-
-      if (Object.keys(updateRequest).length === 0) {
-        this.console.printWarning('No changes specified.');
+      if (threshold === currentThreshold) {
+        this.console.printWarning('New threshold is the same as current threshold.');
         await this.console.question('Press Enter to continue...');
         return;
       }
+
+      // Show what will change and ask for confirmation
+      this.console.printInfo(`\n🔄 Proposed Change:`);
+      this.console.printInfo(`   Current: ${currentThreshold}/${signerCount} signatures required`);
+      this.console.printInfo(`   New: ${threshold}/${signerCount} signatures required`);
+      
+      if (threshold < currentThreshold) {
+        this.console.printWarning('⚠️  This will REDUCE security by requiring fewer signatures.');
+      } else {
+        this.console.printInfo('✅ This will INCREASE security by requiring more signatures.');
+      }
+
+      const confirm = await this.console.confirm('\nProceed with signature threshold update?');
+      if (!confirm) {
+        this.console.printInfo('Update cancelled.');
+        await this.console.question('Press Enter to continue...');
+        return;
+      }
+
+      const updateRequest = { threshold };
 
       this.console.printInfo('🔍 Calling Grid SDK: updateAccount()');
       const updateResponse = await this.gridClient.updateAccount(accountAddress, updateRequest);
@@ -634,8 +644,37 @@ class GridPayrollDemo {
       console.log(JSON.stringify(updateResponse, null, 2));
       console.log('=== END RESPONSE ===\n');
 
-      this.console.printSuccess('✅ Account policy update initiated!');
-      this.console.printInfo('Changes will take effect after transaction confirmation.');
+      // Sign and send the transaction to deploy the policy changes (following pattern from createSpendingLimit)
+      this.console.printInfo('🔍 Calling Grid SDK: signAndSend() to deploy account policy changes');
+      
+      // Debug: Log the parameters we're passing to signAndSend
+      console.log('\n=== DEBUG: signAndSend PARAMETERS ===');
+      console.log('sessionSecrets:', JSON.stringify(this.sessionSecrets, null, 2));
+      console.log('session (authResult.data.authentication):', JSON.stringify(this.authResult.data.authentication, null, 2));
+      console.log('transactionPayload:', JSON.stringify(updateResponse.data, null, 2));
+      console.log('address:', accountAddress);
+      console.log('=== END DEBUG ===\n');
+      
+      const signature = await this.gridClient.signAndSend({
+        sessionSecrets: this.sessionSecrets,
+        session: this.authResult.data.authentication,
+        transactionPayload: updateResponse.data,
+        address: accountAddress
+      });
+
+      console.log('\n=== GRID SDK RESPONSE: signAndSend ===');
+      console.log(JSON.stringify(signature, null, 2));
+      console.log('=== END RESPONSE ===\n');
+
+      this.console.printSuccess('✅ Account policy changes deployed successfully!');
+      
+      if (signature && signature.data && signature.data.transaction_signature) {
+        this.console.printSuccess(`📝 Transaction Signature: ${signature.data.transaction_signature}`);
+      }
+      
+      if (updateRequest.threshold) {
+        this.console.printInfo(`🔧 New Signature Threshold: ${updateRequest.threshold}`);
+      }
 
     } catch (error) {
       this.console.printError(`Failed to update account policies: ${error instanceof Error ? error.message : 'Unknown error'}`);
