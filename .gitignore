@@ -115,7 +115,5 @@ sessions/
 *.session
 
 # Grid SDK reference files and project documentation
-grid-interfaces.json
-grid-methods.json
-grid-types.json
+
 claude.md

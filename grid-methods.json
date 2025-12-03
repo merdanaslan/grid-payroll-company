@@ -1,0 +1,490 @@
+{
+    "name": "GridClient",
+    "description": "The main client class for the Grid SDK that provides comprehensive functionality for account management, authentication, and transaction processing.",
+    "properties": [
+      {
+        "name": "apiConfig",
+        "modifier": "protected",
+        "type": "GridApiConfig"
+      }
+    ],
+    "methods": {
+      "AccountManagement": [
+        {
+          "name": "createAccount",
+          "description": "Creates either an email-based account (requires OTP verification) or a signer-based account (immediately active).",
+          "parameters": [
+            { "name": "input", "type": "CreateAccountRequest | CreateAccountInput" }
+          ],
+          "returns": "Promise<GridResponse<CreateAccountResponse>>"
+        },
+        {
+          "name": "getAccount",
+          "description": "Retrieves comprehensive account details including account type, policies, signers, thresholds, and metadata.",
+          "parameters": [
+            { "name": "accountAddress", "type": "string" }
+          ],
+          "returns": "Promise<GridResponse<GetAccountResponse>>"
+        },
+        {
+          "name": "updateAccount",
+          "description": "Updates account settings and configuration such as policies, signers, thresholds, and metadata.",
+          "parameters": [
+            { "name": "accountAddress", "type": "string" },
+            { "name": "request", "type": "UpdateAccountRequest" },
+            { "name": "admin", "type": "boolean", "optional": true }
+          ],
+          "returns": "Promise<GridResponse<TransactionPayload>>"
+        },
+        {
+          "name": "getAccountBalances",
+          "description": "Retrieves the current token balances for an account, including native SOL and SPL tokens, with optional filtering and pagination.",
+          "parameters": [
+            { "name": "accountAddress", "type": "string" },
+            { "name": "queryParams", "type": "GetAccountBalancesQueryParams", "optional": true }
+          ],
+          "returns": "Promise<GridResponse<AccountBalancesData>>"
+        },
+        {
+          "name": "getTransfers",
+          "description": "Retrieves the transaction history for an account, including incoming and outgoing transfers, with filtering and pagination support.",
+          "parameters": [
+            { "name": "accountAddress", "type": "string" },
+            { "name": "options", "type": "GetTransfersOptions", "optional": true }
+          ],
+          "returns": "Promise<GridResponse<TransferResponse[]>>"
+        }
+      ],
+      "Authentication": [
+        {
+          "name": "initAuth",
+          "description": "Initializes authentication for an existing user as the first step in the authentication process.",
+          "parameters": [
+            { "name": "request", "type": "InitAuthRequest | AuthenticationRequest" }
+          ],
+          "returns": "Promise<GridResponse<InitAuthResponse>>"
+        },
+        {
+          "name": "completeAuth",
+          "description": "Completes email-based authentication by verifying the OTP code and establishing an authenticated session.",
+          "parameters": [
+            { "name": "request", "type": "CompleteAuthRequestWithOtp" }
+          ],
+          "returns": "Promise<GridResponse<CompleteAuthResponse>>"
+        },
+        {
+          "name": "completeAuthAndCreateAccount",
+          "description": "Combines authentication completion with account creation for streamlined onboarding.",
+          "parameters": [
+            { "name": "request", "type": "CompleteAuthAndCreateAccountRequest" }
+          ],
+          "returns": "Promise<GridResponse<CompleteAuthAndCreateAccountResponse>>"
+        },
+        {
+          "name": "refreshSession",
+          "description": "Refreshes an MPC provider session to extend its lifetime and update authorization keys and tokens.",
+          "parameters": [
+            { "name": "request", "type": "RefreshSessionRequest" }
+          ],
+          "returns": "Promise<GridResponse<RefreshSessionResponse>>"
+        }
+      ],
+      "ContextManagement": [
+        {
+          "name": "getContext",
+          "description": "Retrieves the current Grid client context, including configuration and user-related information.",
+          "parameters": [],
+          "returns": "GridClientContext"
+        }
+      ],
+      "KycVerification": [
+        {
+          "name": "requestKycLink",
+          "description": "Generates a link for KYC identity verification that users can complete through a hosted flow.",
+          "parameters": [
+            { "name": "accountAddress", "type": "string" },
+            { "name": "request", "type": "RequestKycLinkRequest" }
+          ],
+          "returns": "Promise<GridResponse<KycLink>>"
+        },
+        {
+          "name": "getKycStatus",
+          "description": "Retrieves the current status of a KYC verification process, including completion state and verification level.",
+          "parameters": [
+            { "name": "accountAddress", "type": "string" },
+            { "name": "kycId", "type": "string" }
+          ],
+          "returns": "Promise<GridResponse<KycStatusData>>"
+        }
+      ],
+      "KeyManagement": [
+        {
+          "name": "generateSessionSecrets",
+          "description": "Generates session secrets for supported providers to be used during authentication and signing operations.",
+          "parameters": [],
+          "returns": "Promise<SessionSecrets>"
+        }
+      ],
+      "Other": [
+        {
+          "name": "extractSignableTransaction",
+          "description": "Extracts a Solana VersionedTransaction from a Grid transaction response, ready to be signed with solana-web3.js.",
+          "parameters": [
+            { "name": "transactionData", "type": "GridResponse<TransactionPayload>" }
+          ],
+          "returns": "VersionedTransaction"
+        },
+        {
+          "name": "setExternallySignedTransaction",
+          "description": "Injects an externally signed transaction into a Grid transaction object so it can be submitted via the Grid API.",
+          "parameters": [
+            { "name": "transactionData", "type": "GridResponse<TransactionPayload>" },
+            { "name": "externallySignedTransaction", "type": "VersionedTransaction" }
+          ],
+          "returns": "GridResponse<TransactionPayload>"
+        }
+      ],
+      "PasskeyManagement": [
+        {
+          "name": "getPasskeys",
+          "description": "Retrieves all passkeys associated with an account.",
+          "parameters": [
+            { "name": "accountAddress", "type": "string" }
+          ],
+          "returns": "Promise<GridResponse<GetPasskeysResponse>>"
+        },
+        {
+          "name": "addPasskey",
+          "description": "Registers a new passkey credential for an account.",
+          "parameters": [
+            { "name": "accountAddress", "type": "string" },
+            { "name": "request", "type": "AddPasskeyRequest" },
+            { "name": "queryParams", "type": "AddPasskeyQueryParams", "optional": true }
+          ],
+          "returns": "Promise<GridResponse<AddPasskeyResponse>>"
+        },
+        {
+          "name": "removePasskey",
+          "description": "Removes an existing passkey credential from an account, revoking its ability to authorize transactions.",
+          "parameters": [
+            { "name": "accountAddress", "type": "string" },
+            { "name": "passkeyAddress", "type": "string" },
+            { "name": "transactionSigners", "type": "string[]", "optional": true },
+            { "name": "queryParams", "type": "RemovePasskeyQueryParams", "optional": true }
+          ],
+          "returns": "Promise<GridResponse<RemovePasskeyResponse>>"
+        },
+        {
+          "name": "createPasskeyCredentials",
+          "description": "Initiates WebAuthn credential creation for registering a new passkey with the user’s authenticator.",
+          "parameters": [
+            { "name": "params", "type": "PasskeyRequest" }
+          ],
+          "returns": "Promise<PasskeyCredentialData>"
+        },
+        {
+          "name": "getPasskeyCredentials",
+          "description": "Initiates WebAuthn authentication using an existing passkey credential.",
+          "parameters": [
+            { "name": "params", "type": "PasskeyRequest" },
+            { "name": "credentialData", "type": "PasskeyCredentialData", "optional": true }
+          ],
+          "returns": "Promise<PasskeyAssertionResponse>"
+        },
+        {
+          "name": "extractPasskeyCreateParams",
+          "description": "Parses URL search parameters to extract passkey creation parameters.",
+          "parameters": [
+            { "name": "query", "type": "URLSearchParams" }
+          ],
+          "returns": "PasskeyRequest"
+        },
+        {
+          "name": "extractPasskeyAuthParams",
+          "description": "Parses URL search parameters to extract passkey authentication parameters.",
+          "parameters": [
+            { "name": "query", "type": "URLSearchParams" }
+          ],
+          "returns": "PasskeyRequest"
+        }
+      ],
+      "PasskeySessions": [
+        {
+          "name": "createPasskeySession",
+          "description": "Starts a new passkey authentication session, preparing challenge and session data for WebAuthn.",
+          "parameters": [
+            { "name": "params", "type": "CreatePasskeySessionRequest" },
+            { "name": "environment", "type": "string" }
+          ],
+          "returns": "Promise<CreatePasskeySessionResponse>"
+        },
+        {
+          "name": "authorizePasskeySession",
+          "description": "Submits passkey authentication data to authorize an existing passkey session.",
+          "parameters": [
+            { "name": "params", "type": "AuthorizePasskeySessionRequest" },
+            { "name": "environment", "type": "string" }
+          ],
+          "returns": "Promise<AuthorizePasskeySessionResponse>"
+        },
+        {
+          "name": "submitPasskeySession",
+          "description": "Finalizes a passkey session, generating final session tokens and account access credentials.",
+          "parameters": [
+            { "name": "params", "type": "SubmitPasskeySessionRequest" },
+            { "name": "environment", "type": "string" }
+          ],
+          "returns": "Promise<SubmitPasskeySessionResponse>"
+        },
+        {
+          "name": "findPasskeyAccount",
+          "description": "Searches for an existing passkey account using credential information.",
+          "parameters": [
+            { "name": "params", "type": "FindPasskeyAccountRequest" },
+            { "name": "environment", "type": "string" }
+          ],
+          "returns": "Promise<FindPasskeyAccountResponse>"
+        },
+        {
+          "name": "getPasskeyAccount",
+          "description": "Retrieves detailed information about a specific passkey account, including session status.",
+          "parameters": [
+            { "name": "passkeyAddress", "type": "string" },
+            { "name": "environment", "type": "string" }
+          ],
+          "returns": "Promise<GetPasskeySessionResponse>"
+        }
+      ],
+      "PaymentProcessing": [
+        {
+          "name": "createPaymentIntent",
+          "description": "Initiates a payment intent for fiat-to-crypto conversion into a specified account.",
+          "parameters": [
+            { "name": "accountAddress", "type": "string" },
+            { "name": "request", "type": "CreatePaymentIntentRequest" }
+          ],
+          "returns": "Promise<GridResponse<CreatePaymentIntentResponse>>"
+        }
+      ],
+      "SpendingLimits": [
+        {
+          "name": "createSpendingLimit",
+          "description": "Creates a new spending limit for an account with defined amount, token, and period.",
+          "parameters": [
+            { "name": "smartAccountAddress", "type": "string" },
+            { "name": "request", "type": "SpendingLimitRequest" }
+          ],
+          "returns": "Promise<GridResponse<CreateSpendingLimitResponsePayload>>"
+        },
+        {
+          "name": "updateSpendingLimit",
+          "description": "Modifies parameters of an existing spending limit such as amount, period, or signers.",
+          "parameters": [
+            { "name": "accountAddress", "type": "string" },
+            { "name": "spendingLimitAddress", "type": "string" },
+            { "name": "request", "type": "UpdateSpendingLimitRequest" }
+          ],
+          "returns": "Promise<GridResponse<SpendingLimitResponsePayload>>"
+        },
+        {
+          "name": "deleteSpendingLimit",
+          "description": "Deletes a spending limit, removing restrictions for the associated token.",
+          "parameters": [
+            { "name": "accountAddress", "type": "string" },
+            { "name": "spendingLimitAddress", "type": "string" }
+          ],
+          "returns": "Promise<GridResponse<SpendingLimitResponsePayload>>"
+        },
+        {
+          "name": "useSpendingLimit",
+          "description": "Uses an existing spending limit to authorize a transaction within its constraints.",
+          "parameters": [
+            { "name": "accountAddress", "type": "string" },
+            { "name": "spendingLimitAddress", "type": "string" },
+            { "name": "request", "type": "UseSpendingLimitRequest" }
+          ],
+          "returns": "Promise<GridResponse<SpendingLimitResponsePayload>>"
+        },
+        {
+          "name": "getSpendingLimit",
+          "description": "Retrieves a specific spending limit by its address.",
+          "parameters": [
+            { "name": "accountAddress", "type": "string" },
+            { "name": "spendingLimitAddress", "type": "string" }
+          ],
+          "returns": "Promise<GridResponse<SpendingLimitData>>"
+        },
+        {
+          "name": "getSpendingLimits",
+          "description": "Retrieves all spending limits configured for an account.",
+          "parameters": [
+            { "name": "accountAddress", "type": "string" }
+          ],
+          "returns": "Promise<GridResponse<SpendingLimitData[]>>"
+        }
+      ],
+      "StandingOrders": [
+        {
+          "name": "createStandingOrder",
+          "description": "Creates a new standing order for recurring payments.",
+          "parameters": [
+            { "name": "accountAddress", "type": "string" },
+            { "name": "request", "type": "CreateStandingOrderRequest" }
+          ],
+          "returns": "Promise<GridResponse<CreateStandingOrderResponse>>"
+        },
+        {
+          "name": "getStandingOrders",
+          "description": "Retrieves all standing orders for an account, including active, paused, and completed schedules.",
+          "parameters": [
+            { "name": "accountAddress", "type": "string" },
+            { "name": "queryParams", "type": "GetStandingOrdersQueryParams", "optional": true }
+          ],
+          "returns": "Promise<GridResponse<StandingOrder[]>>"
+        },
+        {
+          "name": "getStandingOrder",
+          "description": "Retrieves detailed information about a specific standing order.",
+          "parameters": [
+            { "name": "accountAddress", "type": "string" },
+            { "name": "standingOrderId", "type": "string" }
+          ],
+          "returns": "Promise<GridResponse<StandingOrder>>"
+        }
+      ],
+      "TransactionProcessing": [
+        {
+          "name": "prepareArbitraryTransaction",
+          "description": "Prepares an arbitrary Solana transaction for signing by adding metadata, fees, and smart account integration.",
+          "parameters": [
+            { "name": "accountAddress", "type": "string" },
+            { "name": "request", "type": "PrepareArbitraryTransactionRequest" },
+            { "name": "queryParams", "type": "PrepareArbitraryTransactionQueryParams", "optional": true }
+          ],
+          "returns": "Promise<GridResponse<TransactionPayload>>"
+        }
+      ],
+      "TransactionSigning": [
+        {
+          "name": "sign",
+          "description": "Signs a transaction, automatically selecting the appropriate authentication provider from the session context.",
+          "parameters": [
+            { "name": "request", "type": "SignRequest" }
+          ],
+          "returns": "Promise<TransactionResult>"
+        },
+        {
+          "name": "signAndSend",
+          "description": "Signs and sends a transaction using the appropriate authentication provider based on session context.",
+          "parameters": [
+            { "name": "request", "type": "SignAndSendRequest" }
+          ],
+          "returns": "Promise<TransactionSubmissionResponse>"
+        },
+        {
+          "name": "send",
+          "description": "Submits a prepared and signed transaction to the Solana network through the Grid API.",
+          "parameters": [
+            { "name": "request", "type": "SendTransactionRequest" }
+          ],
+          "returns": "Promise<TransactionSubmissionResponse>"
+        }
+      ],
+      "Utilities": [
+        {
+          "name": "decodeSignature",
+          "description": "Decodes a transaction signature into a structured representation.",
+          "parameters": [
+            { "name": "signature", "type": "string" }
+          ],
+          "returns": "DecodedSignature"
+        },
+        {
+          "name": "getExplorerUrl",
+          "description": "Builds a Solana explorer URL for a given transaction signature and optional cluster.",
+          "parameters": [
+            { "name": "signature", "type": "string" },
+            { "name": "cluster", "type": "string", "optional": true }
+          ],
+          "returns": "string"
+        },
+        {
+          "name": "getSessionKeyObject",
+          "description": "Helper function to create session key object from string and expiration time.",
+          "parameters": [
+            { "name": "sessionKeyString", "type": "string" },
+            { "name": "expirationInSeconds", "type": "string" }
+          ],
+          "returns": "SessionKey"
+        }
+      ],
+      "VirtualAccounts": [
+        {
+          "name": "createVirtualAccount",
+          "description": "Creates a new virtual account associated with a smart account.",
+          "parameters": [
+            { "name": "accountAddress", "type": "string" },
+            { "name": "request", "type": "CreateVirtualAccountRequest" }
+          ],
+          "returns": "Promise<GridResponse<CreateVirtualAccountResponse>>"
+        },
+        {
+          "name": "requestVirtualAccount",
+          "description": "Creates a virtual bank account that allows users to receive fiat deposits which are automatically converted to cryptocurrency.",
+          "parameters": [
+            { "name": "accountAddress", "type": "string" },
+            { "name": "request", "type": "RequestVirtualAccountRequest" }
+          ],
+          "returns": "Promise<GridResponse<VirtualAccount>>"
+        },
+        {
+          "name": "getVirtualAccounts",
+          "description": "Retrieves all virtual accounts associated with a smart account, with optional filtering.",
+          "parameters": [
+            { "name": "accountAddress", "type": "string" },
+            { "name": "queryParams", "type": "GetVirtualAccountsQueryParams", "optional": true }
+          ],
+          "returns": "Promise<GridResponse<VirtualAccountData[]>>"
+        },
+        {
+          "name": "getVirtualAccount",
+          "description": "Retrieves details for a specific virtual account.",
+          "parameters": [
+            { "name": "accountAddress", "type": "string" },
+            { "name": "virtualAccountAddress", "type": "string" }
+          ],
+          "returns": "Promise<GridResponse<VirtualAccountData>>"
+        },
+        {
+          "name": "updateVirtualAccount",
+          "description": "Updates configuration or metadata for a virtual account.",
+          "parameters": [
+            { "name": "accountAddress", "type": "string" },
+            { "name": "virtualAccountAddress", "type": "string" },
+            { "name": "request", "type": "UpdateVirtualAccountRequest" }
+          ],
+          "returns": "Promise<GridResponse<VirtualAccountData>>"
+        },
+        {
+          "name": "deleteVirtualAccount",
+          "description": "Deletes an existing virtual account from a smart account.",
+          "parameters": [
+            { "name": "accountAddress", "type": "string" },
+            { "name": "virtualAccountAddress", "type": "string" }
+          ],
+          "returns": "Promise<GridResponse<VirtualAccountData>>"
+        },
+        {
+          "name": "getVirtualAccountDeposits",
+          "description": "Retrieves deposits associated with a virtual account, with optional filtering and pagination.",
+          "parameters": [
+            { "name": "accountAddress", "type": "string" },
+            { "name": "virtualAccountAddress", "type": "string" },
+            { "name": "queryParams", "type": "GetVirtualAccountDepositsQueryParams", "optional": true }
+          ],
+          "returns": "Promise<GridResponse<VirtualAccountDepositData[]>>"
+        }
+      ]
+    }
+  }
+  

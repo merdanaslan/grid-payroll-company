@@ -1,0 +1,2520 @@
+[
+    {
+      "name": "GridApiConfig",
+      "description": "Grid API client configuration object for initializing the Grid API client with environment settings, authentication, and optional customizations.",
+      "properties": [
+        {
+          "name": "apiKey",
+          "type": "string",
+          "optional": true,
+          "description": "API key for authentication. Optional for frontend operations."
+        },
+        {
+          "name": "environment",
+          "type": "GridEnvironment",
+          "optional": false,
+          "description": "Target environment for API calls (sandbox or production)."
+        },
+        {
+          "name": "baseUrl",
+          "type": "string",
+          "optional": true,
+          "description": "Base URL for the Grid API."
+        },
+        {
+          "name": "timeout",
+          "type": "number",
+          "optional": true,
+          "description": "Request timeout in milliseconds."
+        },
+        {
+          "name": "retryAttempts",
+          "type": "number",
+          "optional": true,
+          "description": "Number of retry attempts for failed requests."
+        },
+        {
+          "name": "solanaRpcUrl",
+          "type": "string",
+          "optional": true,
+          "description": "Optional Solana RPC endpoint URL."
+        }
+      ]
+    },
+    {
+      "name": "GridErrorDetail",
+      "description": "Detailed error information from API validation failures",
+      "properties": [
+        {
+          "name": "field",
+          "type": "string",
+          "description": "The field that caused the validation error"
+        },
+        {
+          "name": "code",
+          "type": "string",
+          "description": "Machine-readable error code"
+        },
+        {
+          "name": "message",
+          "type": "string",
+          "description": "Human-readable error message"
+        },
+        {
+          "name": "suggestion",
+          "type": "string",
+          "optional": true,
+          "description": "Suggestion for fixing the error"
+        },
+        {
+          "name": "documentation",
+          "type": "string",
+          "optional": true,
+          "description": "Link to relevant documentation"
+        }
+      ]
+    },
+    {
+      "name": "GridResponse",
+      "description": "Generic API response wrapper for all Grid API responses with configurable data type",
+      "typeParameters": [
+        {
+          "name": "T",
+          "defaultType": "any"
+        }
+      ],
+      "properties": [
+        {
+          "name": "success",
+          "type": "boolean",
+          "description": "Whether the API call was successful"
+        },
+        {
+          "name": "data",
+          "type": "T",
+          "optional": true,
+          "description": "Response data if successful"
+        },
+        {
+          "name": "error",
+          "type": "string",
+          "optional": true,
+          "description": "Error message if unsuccessful"
+        },
+        {
+          "name": "code",
+          "type": "string",
+          "optional": true,
+          "description": "Error code for programmatic handling"
+        },
+        {
+          "name": "details",
+          "type": "any",
+          "optional": true,
+          "description": "Detailed validation errors from API response"
+        },
+        {
+          "name": "timestamp",
+          "type": "string",
+          "optional": true,
+          "description": "Error timestamp from backend"
+        },
+        {
+          "name": "requestId",
+          "type": "string",
+          "optional": true,
+          "description": "Request ID for tracking and debugging"
+        }
+      ]
+    },
+    {
+      "name": "AuthenticationRequest",
+      "description": "Authentication request parameters for various providers.",
+      "properties": [
+        {
+          "name": "email",
+          "type": "string",
+          "optional": true,
+          "description": "User email for email-based authentication"
+        },
+        {
+          "name": "keypair",
+          "type": "UniversalKeyPair",
+          "optional": true,
+          "description": "Key pair for cryptographic authentication"
+        },
+        {
+          "name": "passkeyId",
+          "type": "string",
+          "optional": true,
+          "description": "Passkey identifier for passkey authentication"
+        },
+        {
+          "name": "provider",
+          "type": "SignerProvider",
+          "optional": true,
+          "description": "Authentication provider type"
+        },
+        {
+          "name": "expiration",
+          "type": "number",
+          "optional": true,
+          "description": "Authentication expiration timestamp"
+        }
+      ]
+    },
+    {
+      "name": "SignRequest",
+      "description": "Sign Request",
+      "properties": [
+        {
+          "name": "sessionSecrets",
+          "type": "TaggedKeyPair[] | Keypair[]",
+          "description": "Secrets generated via generateSessionSecrets()"
+        },
+        {
+          "name": "session",
+          "type": "any",
+          "optional": true,
+          "description": "Optional session data from authentication via initAuth()"
+        },
+        {
+          "name": "transactionPayload",
+          "type": "TransactionPayload",
+          "description": "Transaction data to be signed and sent"
+        },
+        {
+          "name": "provider",
+          "type": "SignerProvider",
+          "optional": true,
+          "description": "Provider to use for signing (privy, turnkey)"
+        }
+      ]
+    },
+    {
+      "name": "SignAndSendRequest",
+      "description": "Request to sign and send a transaction to the blockchain.",
+      "properties": [
+        {
+          "name": "sessionSecrets",
+          "type": "TaggedKeyPair[] | Keypair[]",
+          "description": "Cryptographic keys for signing"
+        },
+        {
+          "name": "session",
+          "type": "any",
+          "optional": true,
+          "description": "Optional session data from authentication"
+        },
+        {
+          "name": "transactionPayload",
+          "type": "TransactionPayload",
+          "description": "Transaction data to be signed and sent"
+        },
+        {
+          "name": "address",
+          "type": "string",
+          "description": "Target address for the transaction"
+        }
+      ]
+    },
+    {
+      "name": "TransactionPayload",
+      "description": "Transaction payload containing the transaction data and required signatures.",
+      "properties": [
+        {
+          "name": "transaction",
+          "type": "string",
+          "description": "Serialized transaction data"
+        },
+        {
+          "name": "transaction_signers",
+          "type": "string[]",
+          "description": "Array of signer public keys"
+        },
+        {
+          "name": "kms_payloads",
+          "type": "KmsPayload[]",
+          "description": "Key management service payloads for signing"
+        }
+      ]
+    },
+    {
+      "name": "TransactionResult",
+      "description": "Result of a transaction signing operation.",
+      "properties": [
+        {
+          "name": "transaction",
+          "type": "string",
+          "description": "The signed transaction data"
+        },
+        {
+          "name": "kms_payloads",
+          "type": "KmsSignature[]",
+          "description": "Array of KMS signature payloads"
+        }
+      ]
+    },
+    {
+      "name": "UniversalKeyPair",
+      "description": "Universal key pair structure for cryptographic operations.",
+      "properties": [
+        {
+          "name": "publicKey",
+          "type": "string",
+          "description": "The public key as a string"
+        },
+        {
+          "name": "privateKey",
+          "type": "string",
+          "description": "The private key as a string"
+        },
+        {
+          "name": "publicKeyUncompressed",
+          "type": "string",
+          "optional": true,
+          "description": "The public key as a string in uncompressed format (required for turnkey signing)"
+        }
+      ]
+    },
+    {
+      "name": "InitAuthRequest",
+      "description": "Initialize authentication for an existing user.",
+      "properties": [
+        {
+          "name": "email",
+          "type": "string",
+          "optional": true,
+          "description": "User email for authentication"
+        },
+        {
+          "name": "expiration",
+          "type": "number",
+          "optional": true,
+          "description": "Authentication expiration timestamp"
+        }
+      ]
+    },
+    {
+      "name": "InitAuthData",
+      "description": "Authentication initialization data for MPC providers (Privy, Turnkey, etc.)",
+      "properties": [
+        {
+          "name": "type",
+          "type": "string",
+          "description": "Account type"
+        },
+        {
+          "name": "email",
+          "type": "string",
+          "description": "User email address"
+        },
+        {
+          "name": "status",
+          "type": "string",
+          "description": "Authentication status"
+        },
+        {
+          "name": "otp_sent",
+          "type": "boolean",
+          "description": "Whether OTP was sent successfully"
+        },
+        {
+          "name": "otp_id",
+          "type": "string",
+          "optional": true,
+          "description": "Optional OTP identifier"
+        },
+        {
+          "name": "provider",
+          "type": "string",
+          "description": "MPC provider type (privy, turnkey, passkey, external, dynamic)"
+        },
+        {
+          "name": "created_at",
+          "type": "string",
+          "description": "Creation timestamp (ISO string)"
+        },
+        {
+          "name": "expires_at",
+          "type": "string",
+          "description": "Expiration timestamp (ISO string)"
+        }
+      ]
+    },
+    {
+      "name": "InitAuthResponse",
+      "description": "Response from authentication initialization",
+      "properties": [
+        {
+          "name": "data",
+          "type": "InitAuthData | InitAuthEOAData",
+          "description": "Authentication data (varies by provider type)"
+        }
+      ]
+    },
+    {
+      "name": "CompleteAuthRequestWithOtp",
+      "description": "Request to complete authentication with OTP verification.",
+      "properties": [
+        {
+          "name": "expiration",
+          "type": "number",
+          "optional": true,
+          "description": "Authentication expiration"
+        },
+        {
+          "name": "otpCode",
+          "type": "string",
+          "description": "The OTP code received by the user"
+        },
+        {
+          "name": "user",
+          "type": "GridClientUserContext",
+          "description": "User context information"
+        },
+        {
+          "name": "sessionSecrets",
+          "type": "SessionSecrets",
+          "description": "Session-specific cryptographic secrets"
+        }
+      ]
+    },
+    {
+      "name": "CompleteAuthResponse",
+      "description": "Response from completing authentication",
+      "properties": [
+        {
+          "name": "address",
+          "type": "string",
+          "description": "User account address"
+        },
+        {
+          "name": "policies",
+          "type": "AccountPolicies",
+          "description": "Account policies configuration"
+        },
+        {
+          "name": "grid_user_id",
+          "type": "string",
+          "description": "Grid user ID"
+        },
+        {
+          "name": "authentication",
+          "type": "ProviderSessionData",
+          "description": "Provider authentication data"
+        }
+      ]
+    },
+    {
+      "name": "PasskeyInfo",
+      "description": "Passkey Info",
+      "properties": [
+        {
+          "name": "address",
+          "type": "string",
+          "description": "Passkey address"
+        },
+        {
+          "name": "role",
+          "type": "string",
+          "description": "Role assigned to this passkey"
+        },
+        {
+          "name": "permissions",
+          "type": "string[]",
+          "description": "Permissions granted to this passkey"
+        },
+        {
+          "name": "provider",
+          "type": "string",
+          "description": "Authentication provider"
+        },
+        {
+          "name": "added_at",
+          "type": "string",
+          "description": "When the passkey was added"
+        }
+      ]
+    },
+    {
+      "name": "GetPasskeysResponse",
+      "description": "Get Passkeys Response",
+      "properties": [
+        {
+          "name": "account_address",
+          "type": "string",
+          "description": "Account address"
+        },
+        {
+          "name": "passkey",
+          "type": "PasskeyInfo",
+          "description": "Passkey information"
+        }
+      ]
+    },
+    {
+      "name": "AddPasskeyResponse",
+      "description": "Add Passkey Response",
+      "properties": [
+        {
+          "name": "transaction",
+          "type": "string",
+          "description": "Transaction data"
+        },
+        {
+          "name": "passkey",
+          "type": "PasskeyInfo",
+          "description": "Added passkey information"
+        },
+        {
+          "name": "threshold",
+          "type": "number",
+          "description": "Account threshold"
+        },
+        {
+          "name": "status",
+          "type": "string",
+          "description": "Status of the operation"
+        },
+        {
+          "name": "expires_at",
+          "type": "string",
+          "description": "Expiration time"
+        }
+      ]
+    },
+    {
+      "name": "AccountSigner",
+      "description": "Represents a signer in a multi-signature account. Defines the signer's address, role, permissions, and authentication provider.",
+      "properties": [
+        {
+          "name": "address",
+          "type": "string",
+          "description": "The public key address of the signer"
+        },
+        {
+          "name": "role",
+          "type": "SignerRole",
+          "optional": true,
+          "description": "The role assigned to this signer in the account (defaults to 'primary' if not provided)"
+        },
+        {
+          "name": "permissions",
+          "type": "SignerPermission[]",
+          "description": "Array of permissions granted to this signer"
+        },
+        {
+          "name": "provider",
+          "type": "string",
+          "optional": true,
+          "description": "Authentication provider used by this signer (defaults to 'external' if not provided)"
+        }
+      ]
+    },
+    {
+      "name": "AccountPolicies",
+      "description": "Account policies configuration for multi-signature accounts. Defines the signers, approval threshold, and optional security restrictions.",
+      "properties": [
+        {
+          "name": "signers",
+          "type": "AccountSigner[]",
+          "description": "Array of account signers (1-10 signers required)."
+        },
+        {
+          "name": "threshold",
+          "type": "number",
+          "description": "Number of signatures required for approval (must not exceed signers.length)."
+        },
+        {
+          "name": "time_lock",
+          "type": "number",
+          "optional": true,
+          "description": "Optional time lock in seconds (if provided, must be between 1 and u32::MAX)."
+        },
+        {
+          "name": "admin_address",
+          "type": "string",
+          "optional": true,
+          "description": "Optional admin address (Solana public key) for administrative functions."
+        }
+      ]
+    },
+    {
+      "name": "UpdateAccountRequest",
+      "description": "Request parameters for updating an existing Grid account's configuration. All fields are optional - only provide the fields you want to update.",
+      "properties": [
+        {
+          "name": "signers",
+          "type": "AccountSigner[]",
+          "optional": true,
+          "description": "Optional array of signers to update the account with. Replaces existing signers if provided."
+        },
+        {
+          "name": "threshold",
+          "type": "number",
+          "optional": true,
+          "description": "Optional approval threshold (number of required signatures). Must be between 1-10 and not exceed the number of signers."
+        },
+        {
+          "name": "time_lock",
+          "type": "number",
+          "optional": true,
+          "description": "Optional time lock in seconds before transactions can be executed. Must be between 1 and u32::MAX if provided."
+        },
+        {
+          "name": "admin_address",
+          "type": "string | null",
+          "optional": true,
+          "description": "Optional admin address for administrative functions. Pass null to remove existing admin."
+        },
+        {
+          "name": "transaction_signers",
+          "type": "string[]",
+          "optional": true,
+          "description": "Optional array of signer addresses that must approve this update transaction."
+        }
+      ]
+    },
+    {
+      "name": "CreateAccountInput",
+      "description": "Simplified input for creating a Grid account. Provide either an email for email-based accounts or a signer public key for signer-based accounts.",
+      "properties": [
+        {
+          "name": "email",
+          "type": "string",
+          "optional": true,
+          "description": "Email address for email-based accounts."
+        },
+        {
+          "name": "signer",
+          "type": "string",
+          "optional": true,
+          "description": "Solana public key for signer-based accounts."
+        }
+      ]
+    },
+    {
+      "name": "EmailAccountRequest",
+      "description": "Request format for creating an email-based account. The account will be associated with the provided email address.",
+      "properties": [
+        {
+          "name": "type",
+          "type": "\"email\"",
+          "description": "Discriminator field indicating email account type."
+        },
+        {
+          "name": "email",
+          "type": "string",
+          "description": "Email address for the account."
+        }
+      ]
+    },
+    {
+      "name": "SignersAccountRequest",
+      "description": "Request format for creating a signer-based account. Allows full control over account policies including multiple signers and thresholds.",
+      "properties": [
+        {
+          "name": "type",
+          "type": "\"signers\"",
+          "description": "Discriminator field indicating signer account type."
+        },
+        {
+          "name": "policies",
+          "type": "AccountPolicies",
+          "description": "Account policies including signers, threshold, and optional restrictions."
+        },
+        {
+          "name": "grid_user_id",
+          "type": "string",
+          "optional": true,
+          "description": "Optional Grid user ID to associate with the account."
+        },
+        {
+          "name": "memo",
+          "type": "string",
+          "optional": true,
+          "description": "Optional memo for the account creation."
+        }
+      ]
+    },
+    {
+      "name": "EmailAccountResponse",
+      "description": "Response returned when creating an email-based account. Email accounts require subsequent authentication through initAuth and completeAuth flows before they can be used.",
+      "properties": [
+        {
+          "name": "type",
+          "type": "\"email\"",
+          "description": "Discriminator field indicating this is an email account."
+        },
+        {
+          "name": "email",
+          "type": "string",
+          "description": "Email address associated with the account."
+        },
+        {
+          "name": "status",
+          "type": "string",
+          "description": "Current status of the email account."
+        },
+        {
+          "name": "otp_sent",
+          "type": "boolean",
+          "description": "Whether an OTP code was sent to the email."
+        },
+        {
+          "name": "created_at",
+          "type": "string",
+          "description": "ISO timestamp when the account was created."
+        },
+        {
+          "name": "expires_at",
+          "type": "string",
+          "description": "ISO timestamp when the account request expires."
+        },
+        {
+          "name": "memo",
+          "type": "string",
+          "optional": true,
+          "description": "Optional memo for the account."
+        }
+      ]
+    },
+    {
+      "name": "SignersAccountResponse",
+      "description": "Response returned when creating a signers-based account. Signers accounts are immediately active with the provided signers and policies from the account request.",
+      "properties": [
+        {
+          "name": "type",
+          "type": "\"signers\"",
+          "description": "Discriminator field indicating this is a signers account."
+        },
+        {
+          "name": "address",
+          "type": "string",
+          "description": "On-chain address of the created account."
+        },
+        {
+          "name": "policies",
+          "type": "AccountPolicies",
+          "description": "Account policies including signers and spending limits."
+        },
+        {
+          "name": "grid_user_id",
+          "type": "string",
+          "description": "Unique identifier for the Grid user."
+        },
+        {
+          "name": "memo",
+          "type": "string",
+          "optional": true,
+          "description": "Optional memo for the account."
+        }
+      ]
+    },
+    {
+      "name": "GetAccountResponse",
+      "description": "Response from getting an account, including its address, type, policies, and metadata.",
+      "properties": [
+        {
+          "name": "type",
+          "type": "\"email\" | \"signers\"",
+          "description": "Account type discriminator, indicating whether the account is email-based or signers-based."
+        },
+        {
+          "name": "address",
+          "type": "string",
+          "description": "On-chain address of the account."
+        },
+        {
+          "name": "policies",
+          "type": "AccountPolicies",
+          "optional": true,
+          "description": "Account policies including signers, threshold, and optional time lock and admin address."
+        },
+        {
+          "name": "grid_user_id",
+          "type": "string",
+          "description": "Unique identifier for the Grid user that owns the account."
+        },
+        {
+          "name": "memo",
+          "type": "string",
+          "optional": true,
+          "description": "Optional memo associated with the account."
+        },
+        {
+          "name": "created_at",
+          "type": "string",
+          "optional": true,
+          "description": "ISO timestamp when the account was created."
+        },
+        {
+          "name": "status",
+          "type": "string",
+          "optional": true,
+          "description": "Current status of the account (for example active or disabled)."
+        }
+      ]
+    },
+    {
+      "name": "AccountTransaction",
+      "description": "Individual transaction information from an account's transaction history.",
+      "properties": [
+        {
+          "name": "id",
+          "type": "string",
+          "description": "Unique transaction identifier."
+        },
+        {
+          "name": "signature",
+          "type": "string",
+          "description": "Transaction signature hash."
+        },
+        {
+          "name": "status",
+          "type": "string",
+          "description": "Transaction status."
+        },
+        {
+          "name": "created_at",
+          "type": "string",
+          "description": "ISO timestamp when the transaction was created."
+        },
+        {
+          "name": "confirmed_at",
+          "type": "string",
+          "optional": true,
+          "description": "ISO timestamp when the transaction was confirmed, if applicable."
+        }
+      ]
+    },
+    {
+      "name": "GetTransactionsResponse",
+      "description": "Response from getting account transaction history.",
+      "properties": [
+        {
+          "name": "data",
+          "type": "AccountTransaction[]",
+          "optional": true,
+          "description": "Array of account transactions."
+        },
+        {
+          "name": "error",
+          "type": "string",
+          "optional": true,
+          "description": "Error message if the request failed."
+        }
+      ]
+    },
+    {
+      "name": "AccountBalancesData",
+      "description": "Account balances data structure containing SOL and token balances.",
+      "properties": [
+        {
+          "name": "address",
+          "type": "string",
+          "description": "Account address."
+        },
+        {
+          "name": "lamports",
+          "type": "bigint",
+          "description": "Raw SOL balance in lamports."
+        },
+        {
+          "name": "sol",
+          "type": "number",
+          "description": "SOL balance in SOL units."
+        },
+        {
+          "name": "tokens",
+          "type": "TokenBalance[]",
+          "description": "Array of SPL token balances for the account."
+        }
+      ]
+    },
+    {
+      "name": "PaymentDetails",
+      "description": "Payment details describing the source or destination account and currency for a payment operation.",
+      "properties": [
+        {
+          "name": "account",
+          "type": "string",
+          "optional": true,
+          "description": "Optional Grid account address associated with the payment."
+        },
+        {
+          "name": "address",
+          "type": "string",
+          "optional": true,
+          "description": "Optional external address (for example a Solana address) for the payment."
+        },
+        {
+          "name": "currency",
+          "type": "string",
+          "description": "Currency code or identifier used for the payment."
+        },
+        {
+          "name": "payment_rail",
+          "type": "string",
+          "optional": true,
+          "description": "Optional payment rail identifier (for example on-chain, off-ramp provider, etc.)."
+        },
+        {
+          "name": "external_account_id",
+          "type": "string",
+          "optional": true,
+          "description": "Optional external account ID with a payment provider or integration."
+        }
+      ]
+    },
+    {
+      "name": "CreatePaymentIntentRequest",
+      "description": "Request body for creating a payment intent between a source and destination with a specified amount.",
+      "properties": [
+        {
+          "name": "amount",
+          "type": "string",
+          "description": "Payment amount as a string (typically in minor units or a decimal string, depending on currency)."
+        },
+        {
+          "name": "grid_user_id",
+          "type": "string",
+          "description": "Grid user ID that owns or initiates the payment intent."
+        },
+        {
+          "name": "source",
+          "type": "PaymentDetails",
+          "description": "Source payment details for the intent."
+        },
+        {
+          "name": "destination",
+          "type": "PaymentDetails",
+          "description": "Destination payment details for the intent."
+        }
+      ]
+    },
+    {
+      "name": "CreatePaymentIntentResponse",
+      "description": "Response returned after creating a payment intent, including an optional transaction payload to sign and send, or an error message.",
+      "properties": [
+        {
+          "name": "data",
+          "type": "{ transactionPayload?: TransactionPayload } & Omit<any, \"transaction\" | \"kms_payloads\" | \"transaction_signers\">",
+          "optional": true,
+          "description": "Optional data object that may contain a TransactionPayload plus additional fields, excluding the raw transaction, kms_payloads, and transaction_signers fields."
+        },
+        {
+          "name": "error",
+          "type": "string",
+          "optional": true,
+          "description": "Error message if the payment intent creation failed."
+        }
+      ]
+    },
+    {
+      "name": "UpdateSpendingLimitRequest",
+      "description": "Request body for updating an existing spending limit, such as changing amount, mint, period, destinations, or transaction signers.",
+      "properties": [
+        {
+          "name": "amount",
+          "type": "string | number",
+          "optional": true,
+          "description": "Optional new spending limit amount."
+        },
+        {
+          "name": "mint",
+          "type": "string",
+          "optional": true,
+          "description": "Optional SPL token mint address for the spending limit."
+        },
+        {
+          "name": "period",
+          "type": "SpendingLimitPeriod",
+          "optional": true,
+          "description": "Optional period over which the spending limit applies."
+        },
+        {
+          "name": "spending_limit_signers",
+          "type": "string[]",
+          "optional": true,
+          "description": "Optional list of signer addresses that can use this spending limit."
+        },
+        {
+          "name": "destinations",
+          "type": "string[]",
+          "optional": true,
+          "description": "Optional list of allowed destination addresses for this spending limit."
+        },
+        {
+          "name": "expiration",
+          "type": "number",
+          "optional": true,
+          "description": "Optional expiration timestamp for the spending limit."
+        },
+        {
+          "name": "transaction_signers",
+          "type": "string[]",
+          "optional": true,
+          "description": "Optional list of signer addresses that must approve the update transaction."
+        }
+      ]
+    },
+    {
+      "name": "CreateSpendingLimitResponsePayload",
+      "description": "Response payload for spending limit operations. Contains the spending limit address and transaction data required to execute spending limit operations on-chain.",
+      "properties": [
+        {
+          "name": "spending_limit_address",
+          "type": "string",
+          "description": "On-chain address of the spending limit account."
+        },
+        {
+          "name": "transaction",
+          "type": "string",
+          "description": "Serialized transaction data ready for signing."
+        },
+        {
+          "name": "kms_payloads",
+          "type": "KmsPayload[]",
+          "description": "Array of KMS payloads for multi-party signing."
+        },
+        {
+          "name": "transaction_signers",
+          "type": "string[]",
+          "optional": true,
+          "description": "Optional array of transaction signer addresses."
+        }
+      ]
+    },
+    {
+      "name": "SpendingLimitResponsePayload",
+      "description": "Response payload for updating spending limit operations. Contains transaction data required to execute spending limit update operations on-chain, without the spending limit address.",
+      "properties": [
+        {
+          "name": "transaction",
+          "type": "string",
+          "description": "Serialized transaction data ready for signing."
+        },
+        {
+          "name": "transaction_signers",
+          "type": "string[]",
+          "optional": true,
+          "description": "Optional array of transaction signer addresses."
+        },
+        {
+          "name": "kms_payloads",
+          "type": "KmsPayload[]",
+          "description": "Array of KMS payloads for multi-party signing."
+        }
+      ]
+    },
+    {
+      "name": "SpendingLimitData",
+      "description": "Detailed spending limit information returned from GET endpoints. Contains the full state of a spending limit including configuration, current usage, and metadata.",
+      "properties": [
+        {
+          "name": "address",
+          "type": "string",
+          "description": "On-chain address of the spending limit account."
+        },
+        {
+          "name": "settings_address",
+          "type": "string",
+          "description": "Address of the spending limit settings account."
+        },
+        {
+          "name": "main_account_address",
+          "type": "string",
+          "description": "Address of the main smart account this spending limit belongs to."
+        },
+        {
+          "name": "environment",
+          "type": "string",
+          "description": "Environment where the spending limit exists (sandbox or production)."
+        },
+        {
+          "name": "mint",
+          "type": "string",
+          "description": "Mint address of the token for this spending limit."
+        },
+        {
+          "name": "amount",
+          "type": "number",
+          "description": "Maximum amount that can be spent in the period."
+        },
+        {
+          "name": "period",
+          "type": "number",
+          "description": "Period type (0=one_time, 1=daily, 2=weekly, 3=monthly)."
+        },
+        {
+          "name": "remaining_amount",
+          "type": "number",
+          "description": "Remaining amount available in the current period."
+        },
+        {
+          "name": "status",
+          "type": "string",
+          "description": "Current status of the spending limit."
+        },
+        {
+          "name": "last_reset",
+          "type": "number",
+          "description": "Unix timestamp of when the limit was last reset."
+        },
+        {
+          "name": "signers",
+          "type": "string[]",
+          "description": "Array of signer addresses authorized to use this spending limit."
+        },
+        {
+          "name": "destinations",
+          "type": "string[]",
+          "description": "Array of destination addresses where funds can be sent."
+        },
+        {
+          "name": "expiration",
+          "type": "number",
+          "description": "Unix timestamp when this spending limit expires (0 for no expiration)."
+        },
+        {
+          "name": "slot",
+          "type": "number",
+          "description": "Solana slot number when this spending limit was created or last modified."
+        },
+        {
+          "name": "block_time",
+          "type": "string",
+          "description": "Block timestamp when the spending limit was created or last modified."
+        },
+        {
+          "name": "last_modified_signature",
+          "type": "string",
+          "description": "Transaction signature of the last modification."
+        }
+      ]
+    },
+    {
+      "name": "RequestKycLinkRequest",
+      "description": "Request body for generating a KYC link for a Grid user.",
+      "properties": [
+        {
+          "name": "grid_user_id",
+          "type": "string",
+          "description": "Grid user ID the KYC link is associated with."
+        },
+        {
+          "name": "type",
+          "type": "KycType",
+          "description": "KYC type to request (for example individual or business)."
+        },
+        {
+          "name": "email",
+          "type": "string",
+          "description": "Email address used for KYC communication."
+        },
+        {
+          "name": "full_name",
+          "type": "string",
+          "description": "Full legal name of the user or business representative."
+        },
+        {
+          "name": "endorsements",
+          "type": "KycEndorsement[]",
+          "optional": true,
+          "description": "Optional list of KYC endorsements or additional checks to apply."
+        },
+        {
+          "name": "redirect_uri",
+          "type": "string",
+          "optional": true,
+          "description": "Optional redirect URI to send the user back to after completing KYC."
+        }
+      ]
+    },
+    {
+      "name": "KycLink",
+      "description": "KYC verification link data. Contains links and information needed to complete the KYC verification process, including URLs for identity verification and terms of service acceptance.",
+      "properties": [
+        {
+          "name": "id",
+          "type": "string",
+          "description": "Unique identifier for the KYC verification."
+        },
+        {
+          "name": "full_name",
+          "type": "string",
+          "description": "Full name of the person or business being verified."
+        },
+        {
+          "name": "email",
+          "type": "string",
+          "description": "Email address associated with the verification."
+        },
+        {
+          "name": "type",
+          "type": "KycType",
+          "description": "Type of KYC verification (individual or business)."
+        },
+        {
+          "name": "kyc_link",
+          "type": "string",
+          "description": "URL where the user completes KYC identity verification."
+        },
+        {
+          "name": "tos_link",
+          "type": "string",
+          "description": "URL where the user reviews and accepts terms of service."
+        },
+        {
+          "name": "kyc_status",
+          "type": "KycStatus",
+          "description": "Current verification status."
+        },
+        {
+          "name": "rejection_reasons",
+          "type": "string[]",
+          "description": "List of reasons for rejection if KYC was rejected."
+        },
+        {
+          "name": "tos_status",
+          "type": "TosStatus",
+          "description": "Terms of service acceptance status."
+        },
+        {
+          "name": "created_at",
+          "type": "string",
+          "description": "ISO 8601 timestamp when the KYC link was created."
+        },
+        {
+          "name": "customer_id",
+          "type": "string",
+          "description": "External customer ID in the KYC provider system."
+        },
+        {
+          "name": "persona_inquiry_type",
+          "type": "string",
+          "description": "Type of inquiry in the Persona verification system."
+        }
+      ]
+    },
+    {
+      "name": "KycStatusData",
+      "description": "KYC verification status data. Contains the current state of a KYC verification process, including verification status, completion requirements, and timeline information.",
+      "properties": [
+        {
+          "name": "id",
+          "type": "string",
+          "description": "Unique identifier for the KYC verification."
+        },
+        {
+          "name": "account",
+          "type": "string",
+          "description": "Account address associated with this KYC verification."
+        },
+        {
+          "name": "type",
+          "type": "KycType",
+          "description": "Type of KYC verification (individual or business)."
+        },
+        {
+          "name": "status",
+          "type": "KycStatus",
+          "description": "Current verification status."
+        },
+        {
+          "name": "tos_status",
+          "type": "TosStatus",
+          "description": "Terms of service acceptance status."
+        },
+        {
+          "name": "kyc_continuation_link",
+          "type": "string",
+          "optional": true,
+          "description": "Link to continue the KYC process if verification is incomplete."
+        },
+        {
+          "name": "rejection_reasons",
+          "type": "RejectionReason[]",
+          "description": "List of reasons for rejection if KYC was rejected."
+        },
+        {
+          "name": "requirements_due",
+          "type": "string[]",
+          "description": "List of outstanding requirements needed to complete verification."
+        },
+        {
+          "name": "created_at",
+          "type": "string",
+          "description": "ISO 8601 timestamp when the KYC verification was created."
+        },
+        {
+          "name": "updated_at",
+          "type": "string",
+          "description": "ISO 8601 timestamp when the KYC verification was last updated."
+        }
+      ]
+    },
+    {
+      "name": "FeeConfig",
+      "description": "Fee configuration for a transaction, including the fee currency, payer address, and whether fees are self-managed.",
+      "properties": [
+        {
+          "name": "currency",
+          "type": "Currency",
+          "description": "Currency in which the transaction fee will be paid."
+        },
+        {
+          "name": "payer_address",
+          "type": "string",
+          "description": "Address that will pay the transaction fees."
+        },
+        {
+          "name": "self_managed_fees",
+          "type": "boolean",
+          "optional": true,
+          "description": "Whether the client will manage fee payment themselves instead of using Grid-managed fees."
+        }
+      ]
+    },
+    {
+      "name": "PrepareArbitraryTransactionRequest",
+      "description": "Request body for preparing an arbitrary pre-serialized transaction for signing and fee configuration.",
+      "properties": [
+        {
+          "name": "transaction",
+          "type": "string",
+          "description": "Serialized transaction data to be prepared."
+        },
+        {
+          "name": "transaction_signers",
+          "type": "string[]",
+          "optional": true,
+          "description": "Deprecated: use account_signers instead. Optional list of signer addresses for the transaction."
+        },
+        {
+          "name": "account_signers",
+          "type": "string[]",
+          "optional": true,
+          "description": "Optional list of account signer addresses that should sign this transaction."
+        },
+        {
+          "name": "payer_address",
+          "type": "string",
+          "optional": true,
+          "description": "Deprecated: use fee_config instead. Optional address that pays transaction fees."
+        },
+        {
+          "name": "fee_config",
+          "type": "FeeConfig",
+          "optional": true,
+          "description": "Optional fee configuration specifying currency, payer, and fee handling."
+        }
+      ]
+    },
+    {
+      "name": "RemovePasskeyRequest",
+      "description": "Request body for removing a passkey from an account.",
+      "properties": [
+        {
+          "name": "transaction_signers",
+          "type": "string[]",
+          "optional": true,
+          "description": "Optional list of signer addresses that must approve the passkey removal transaction."
+        }
+      ]
+    },
+    {
+      "name": "RemovePasskeyQueryParams",
+      "description": "Query parameters for removing a passkey from an account.",
+      "properties": [
+        {
+          "name": "admin",
+          "type": "boolean",
+          "optional": true,
+          "description": "Whether the passkey being removed is an admin passkey."
+        }
+      ]
+    },
+    {
+      "name": "RemovePasskeyResponse",
+      "description": "Response returned after removing a passkey from an account.",
+      "properties": [
+        {
+          "name": "transaction",
+          "type": "string",
+          "description": "Serialized transaction data for the passkey removal operation."
+        },
+        {
+          "name": "removed_passkey",
+          "type": "PasskeyInfo",
+          "description": "Information about the passkey that was removed."
+        },
+        {
+          "name": "threshold",
+          "type": "number",
+          "description": "Current account threshold after the passkey removal."
+        },
+        {
+          "name": "status",
+          "type": "string",
+          "description": "Status of the remove passkey operation."
+        },
+        {
+          "name": "expires_at",
+          "type": "string",
+          "description": "Expiration time of the transaction or operation, as an ISO 8601 string."
+        }
+      ]
+    },
+    {
+      "name": "Receipt",
+      "description": "Minimal receipt object containing an identifier, object type, and creation timestamp.",
+      "properties": [
+        {
+          "name": "id",
+          "type": "string",
+          "description": "Unique identifier for the receipt."
+        },
+        {
+          "name": "object",
+          "type": "string",
+          "description": "Type of object represented by this receipt."
+        },
+        {
+          "name": "created_at",
+          "type": "string",
+          "description": "ISO 8601 timestamp indicating when the receipt was created."
+        }
+      ]
+    },
+    {
+      "name": "BridgeTransferSource",
+      "description": "Source details for a bridge transfer, describing where funds originate from and which payment rail and currency are used.",
+      "properties": [
+        {
+          "name": "payment_rail",
+          "type": "PaymentRail",
+          "description": "Payment rail used for the bridge transfer (for example bank, onchain, etc.)."
+        },
+        {
+          "name": "currency",
+          "type": "BridgeCurrency",
+          "description": "Currency used for the bridge transfer."
+        },
+        {
+          "name": "external_account_id",
+          "type": "string",
+          "optional": true,
+          "description": "Optional external account identifier at the bridge or banking provider."
+        },
+        {
+          "name": "bridge_wallet_id",
+          "type": "string",
+          "optional": true,
+          "description": "Optional bridge wallet identifier used as the source of funds."
+        },
+        {
+          "name": "from_address",
+          "type": "string",
+          "optional": true,
+          "description": "Optional originating address for the transfer (for example a blockchain address)."
+        },
+        {
+          "name": "omad",
+          "type": "string",
+          "optional": true,
+          "description": "Optional origin message account identifier (OMAD) for bank wires."
+        },
+        {
+          "name": "imad",
+          "type": "string",
+          "optional": true,
+          "description": "Optional input message accountability data (IMAD) for bank wires."
+        },
+        {
+          "name": "bank_beneficiary_name",
+          "type": "string",
+          "optional": true,
+          "description": "Optional bank beneficiary name associated with the source account."
+        }
+      ]
+    },
+    {
+      "name": "BridgeTransferDestination",
+      "description": "Destination details for a bridge transfer, describing where funds are delivered and which payment rail and currency are used.",
+      "properties": [
+        {
+          "name": "currency",
+          "type": "BridgeCurrency",
+          "description": "Currency used for the bridge transfer destination."
+        },
+        {
+          "name": "payment_rail",
+          "type": "PaymentRail",
+          "description": "Payment rail used for delivering funds (for example bank, onchain, etc.)."
+        },
+        {
+          "name": "external_account_id",
+          "type": "string",
+          "optional": true,
+          "description": "Optional external account identifier at the bridge or banking provider for the destination."
+        },
+        {
+          "name": "bridge_wallet_id",
+          "type": "string",
+          "optional": true,
+          "description": "Optional bridge wallet identifier used as the destination of funds."
+        },
+        {
+          "name": "from_address",
+          "type": "string",
+          "optional": true,
+          "description": "Optional originating or associated address for the transfer (for example a blockchain address)."
+        },
+        {
+          "name": "wire_message",
+          "type": "string",
+          "optional": true,
+          "description": "Optional wire message for bank transfers."
+        },
+        {
+          "name": "sepa_reference",
+          "type": "string",
+          "optional": true,
+          "description": "Optional SEPA payment reference."
+        },
+        {
+          "name": "swift_reference",
+          "type": "string",
+          "optional": true,
+          "description": "Optional SWIFT payment reference."
+        }
+      ]
+    },
+    {
+      "name": "BridgeTransferSourceDepositInstructions",
+      "description": "Deposit instructions for funding the source side of a bridge transfer, including bank and beneficiary details.",
+      "properties": [
+        {
+          "name": "amount",
+          "type": "string",
+          "optional": true,
+          "description": "Optional deposit amount required to fund the bridge transfer."
+        },
+        {
+          "name": "currency",
+          "type": "BridgeCurrency",
+          "description": "Currency in which the deposit must be made."
+        },
+        {
+          "name": "deposit_message",
+          "type": "string",
+          "optional": true,
+          "description": "Optional deposit message or reference that must be included with the payment."
+        },
+        {
+          "name": "payment_rail",
+          "type": "PaymentRail",
+          "description": "Payment rail used for the deposit (for example bank, SEPA, SWIFT, etc.)."
+        },
+        {
+          "name": "from_address",
+          "type": "string",
+          "optional": true,
+          "description": "Optional originating address for on-chain deposits."
+        },
+        {
+          "name": "to_address",
+          "type": "string",
+          "optional": true,
+          "description": "Optional destination address for on-chain deposits."
+        },
+        {
+          "name": "bank_name",
+          "type": "string",
+          "optional": true,
+          "description": "Optional name of the beneficiary bank."
+        },
+        {
+          "name": "bank_address",
+          "type": "string",
+          "optional": true,
+          "description": "Optional street address of the beneficiary bank."
+        },
+        {
+          "name": "bank_city",
+          "type": "string",
+          "optional": true,
+          "description": "Optional city of the beneficiary bank."
+        },
+        {
+          "name": "bank_country",
+          "type": "string",
+          "optional": true,
+          "description": "Optional country of the beneficiary bank."
+        },
+        {
+          "name": "bank_postal_code",
+          "type": "string",
+          "optional": true,
+          "description": "Optional postal code of the beneficiary bank."
+        },
+        {
+          "name": "iban",
+          "type": "string",
+          "optional": true,
+          "description": "Optional IBAN for the beneficiary account."
+        },
+        {
+          "name": "swift_bic",
+          "type": "string",
+          "optional": true,
+          "description": "Optional SWIFT/BIC code for the beneficiary bank."
+        },
+        {
+          "name": "beneficiary_name",
+          "type": "string",
+          "optional": true,
+          "description": "Optional name of the beneficiary account holder."
+        },
+        {
+          "name": "beneficiary_address",
+          "type": "string",
+          "optional": true,
+          "description": "Optional street address of the beneficiary."
+        },
+        {
+          "name": "beneficiary_city",
+          "type": "string",
+          "optional": true,
+          "description": "Optional city of the beneficiary."
+        },
+        {
+          "name": "beneficiary_country",
+          "type": "string",
+          "optional": true,
+          "description": "Optional country of the beneficiary."
+        },
+        {
+          "name": "beneficiary_postal_code",
+          "type": "string",
+          "optional": true,
+          "description": "Optional postal code of the beneficiary."
+        },
+        {
+          "name": "routing_number",
+          "type": "string",
+          "optional": true,
+          "description": "Optional bank routing number (typically for US domestic transfers)."
+        },
+        {
+          "name": "account_number",
+          "type": "string",
+          "optional": true,
+          "description": "Optional beneficiary bank account number."
+        },
+        {
+          "name": "account_type",
+          "type": "string",
+          "optional": true,
+          "description": "Optional account type (for example checking or savings)."
+        }
+      ]
+    },
+    {
+      "name": "BridgeTransfer",
+      "description": "Bridge transfer data for fiat-to-crypto or crypto-to-fiat transfers. Represents transfers processed through Bridge’s payment rails, including ACH, SEPA, wire transfers, and other traditional banking methods.",
+      "properties": [
+        {
+          "name": "id",
+          "type": "string",
+          "description": "Unique identifier for the bridge transfer."
+        },
+        {
+          "name": "state",
+          "type": "TransferState",
+          "description": "Current state of the transfer (for example pending, completed, failed)."
+        },
+        {
+          "name": "on_behalf_of",
+          "type": "string",
+          "description": "Grid user ID or account on whose behalf the transfer is executed."
+        },
+        {
+          "name": "source_deposit_instructions",
+          "type": "BridgeTransferSourceDepositInstructions",
+          "optional": true,
+          "description": "Optional deposit instructions for funding the source of the transfer."
+        },
+        {
+          "name": "amount",
+          "type": "string",
+          "description": "Transfer amount as a string."
+        },
+        {
+          "name": "client_reference_id",
+          "type": "string",
+          "optional": true,
+          "description": "Optional client-supplied reference identifier for idempotency or reconciliation."
+        },
+        {
+          "name": "currency",
+          "type": "BridgeCurrency",
+          "optional": true,
+          "description": "Currency used for the transfer."
+        },
+        {
+          "name": "developer_fee",
+          "type": "string",
+          "description": "Developer fee amount charged for processing the transfer."
+        },
+        {
+          "name": "source",
+          "type": "BridgeTransferSource",
+          "description": "Source details for the transfer."
+        },
+        {
+          "name": "destination",
+          "type": "BridgeTransferDestination",
+          "description": "Destination details for the transfer."
+        },
+        {
+          "name": "receipt",
+          "type": "Receipt",
+          "description": "Receipt object containing metadata about the transfer."
+        },
+        {
+          "name": "blockchain_memo",
+          "type": "string",
+          "optional": true,
+          "description": "Optional blockchain memo or reference used when the transfer touches a blockchain."
+        },
+        {
+          "name": "created_at",
+          "type": "string",
+          "description": "ISO 8601 timestamp when the bridge transfer was created."
+        },
+        {
+          "name": "updated_at",
+          "type": "string",
+          "description": "ISO 8601 timestamp when the bridge transfer was last updated."
+        }
+      ]
+    },
+    {
+      "name": "SplTransfer",
+      "description": "SPL token transfer data for on-chain Solana transfers. Represents native Solana token transfers using the SPL Token program, including both standard SPL tokens and Token-2022 program tokens.",
+      "properties": [
+        {
+          "name": "id",
+          "type": "string",
+          "description": "Unique identifier for the SPL transfer."
+        },
+        {
+          "name": "grid_user_id",
+          "type": "string",
+          "description": "Grid user ID associated with the transfer."
+        },
+        {
+          "name": "main_account_address",
+          "type": "string",
+          "description": "Smart account address that initiated or received the transfer."
+        },
+        {
+          "name": "mint",
+          "type": "string",
+          "description": "SPL token mint address."
+        },
+        {
+          "name": "is_token_2022",
+          "type": "boolean",
+          "description": "Whether the token uses the Token-2022 program."
+        },
+        {
+          "name": "signature",
+          "type": "string",
+          "description": "Solana transaction signature."
+        },
+        {
+          "name": "confirmation_status",
+          "type": "ConfirmationStatus",
+          "description": "Confirmation status of the transaction."
+        },
+        {
+          "name": "from_address",
+          "type": "string",
+          "description": "Source address of the transfer."
+        },
+        {
+          "name": "to_address",
+          "type": "string",
+          "description": "Destination address of the transfer."
+        },
+        {
+          "name": "amount",
+          "type": "string",
+          "description": "Raw token amount in base units (no decimals applied)."
+        },
+        {
+          "name": "ui_amount",
+          "type": "string",
+          "description": "Human-readable token amount with decimals applied."
+        },
+        {
+          "name": "decimals",
+          "type": "number",
+          "description": "Number of decimals for the token mint."
+        },
+        {
+          "name": "confirmed_at",
+          "type": "string",
+          "optional": true,
+          "description": "Timestamp when the transfer was confirmed, if available."
+        },
+        {
+          "name": "created_at",
+          "type": "string",
+          "description": "ISO 8601 timestamp when the transfer record was created."
+        },
+        {
+          "name": "updated_at",
+          "type": "string",
+          "description": "ISO 8601 timestamp when the transfer record was last updated."
+        },
+        {
+          "name": "direction",
+          "type": "TransferDirection",
+          "optional": true,
+          "description": "Direction of the transfer relative to the main account (inbound or outbound)."
+        },
+        {
+          "name": "environment",
+          "type": "GridEnvironment",
+          "optional": true,
+          "description": "Grid environment in which the transfer occurred (sandbox or production)."
+        },
+        {
+          "name": "instruction_index",
+          "type": "number",
+          "optional": true,
+          "description": "Index of the instruction within the transaction that performed the transfer."
+        }
+      ]
+    },
+    {
+      "name": "GetTransfersOptions",
+      "description": "Optional filter and pagination parameters for listing bridge or SPL transfers.",
+      "properties": [
+        {
+          "name": "payment_rail",
+          "type": "PaymentRail",
+          "optional": true,
+          "description": "Filter transfers by payment rail (for example bank, onchain, etc.)."
+        },
+        {
+          "name": "status",
+          "type": "TransferState",
+          "optional": true,
+          "description": "Filter transfers by transfer state."
+        },
+        {
+          "name": "currency",
+          "type": "BridgeCurrency",
+          "optional": true,
+          "description": "Filter transfers by currency."
+        },
+        {
+          "name": "start_date",
+          "type": "string",
+          "optional": true,
+          "description": "ISO 8601 start date to filter transfers created on or after this date."
+        },
+        {
+          "name": "end_date",
+          "type": "string",
+          "optional": true,
+          "description": "ISO 8601 end date to filter transfers created on or before this date."
+        },
+        {
+          "name": "tx_hash",
+          "type": "string",
+          "optional": true,
+          "description": "Filter transfers by a specific transaction hash."
+        },
+        {
+          "name": "limit",
+          "type": "number",
+          "optional": true,
+          "description": "Maximum number of transfers to return."
+        },
+        {
+          "name": "cursor",
+          "type": "string",
+          "optional": true,
+          "description": "Pagination cursor for fetching the next page of results."
+        }
+      ]
+    },
+    {
+      "name": "RequestVirtualAccountRequest",
+      "description": "Request body for creating a virtual account for a Grid user in a specific currency.",
+      "properties": [
+        {
+          "name": "grid_user_id",
+          "type": "string",
+          "description": "The Grid user ID."
+        },
+        {
+          "name": "currency",
+          "type": "BridgeCurrency",
+          "description": "The currency of the virtual account."
+        }
+      ]
+    },
+    {
+      "name": "VirtualAccount",
+      "description": "Virtual account data representing an off-chain account with deposit instructions and a destination for funds.",
+      "properties": [
+        {
+          "name": "id",
+          "type": "string",
+          "description": "Unique identifier for the virtual account."
+        },
+        {
+          "name": "customer_id",
+          "type": "string",
+          "description": "Customer identifier at the virtual account or banking provider."
+        },
+        {
+          "name": "source_deposit_instructions",
+          "type": "SourceDepositInstructions",
+          "description": "Deposit instructions for funding the virtual account."
+        },
+        {
+          "name": "destination",
+          "type": "VirtualAccountDestination",
+          "description": "Destination descriptor for where funds from the virtual account are ultimately routed."
+        },
+        {
+          "name": "status",
+          "type": "string",
+          "description": "Current status of the virtual account."
+        },
+        {
+          "name": "developer_fee_percent",
+          "type": "string",
+          "description": "Developer fee percentage applied to transactions through this virtual account."
+        }
+      ]
+    },
+    {
+      "name": "GetVirtualAccountsQueryParams",
+      "description": "Query parameters for listing virtual accounts with optional currency filters.",
+      "properties": [
+        {
+          "name": "source_currency",
+          "type": "BridgeCurrency",
+          "optional": true,
+          "description": "The source currency."
+        },
+        {
+          "name": "destination_currency",
+          "type": "BridgeCurrency",
+          "optional": true,
+          "description": "The destination currency."
+        }
+      ]
+    },
+    {
+      "name": "CreateStandingOrderRequest",
+      "description": "Request body for creating a standing order (recurring payment) between a source and destination.",
+      "properties": [
+        {
+          "name": "amount",
+          "type": "string",
+          "description": "Amount to transfer on each execution of the standing order."
+        },
+        {
+          "name": "grid_user_id",
+          "type": "string",
+          "description": "Grid user ID that owns or initiates the standing order."
+        },
+        {
+          "name": "source",
+          "type": "Details",
+          "description": "Source details for the standing order."
+        },
+        {
+          "name": "destination",
+          "type": "Details",
+          "description": "Destination details for the standing order."
+        },
+        {
+          "name": "frequency",
+          "type": "StandingOrderFrequency",
+          "description": "Frequency at which the standing order should execute."
+        },
+        {
+          "name": "start_date",
+          "type": "string",
+          "description": "ISO 8601 start date when the standing order becomes active."
+        },
+        {
+          "name": "end_date",
+          "type": "string",
+          "optional": true,
+          "description": "Optional ISO 8601 end date after which the standing order will no longer execute."
+        }
+      ]
+    },
+    {
+      "name": "GetStandingOrdersQueryParams",
+      "description": "Query parameters for listing standing orders with optional filters and pagination.",
+      "properties": [
+        {
+          "name": "status",
+          "type": "StandingOrderStatus",
+          "optional": true,
+          "description": "Filter standing orders by status."
+        },
+        {
+          "name": "currency",
+          "type": "string",
+          "optional": true,
+          "description": "Filter standing orders by currency."
+        },
+        {
+          "name": "start_date",
+          "type": "string",
+          "optional": true,
+          "description": "ISO 8601 start date to filter standing orders created on or after this date."
+        },
+        {
+          "name": "end_date",
+          "type": "string",
+          "optional": true,
+          "description": "ISO 8601 end date to filter standing orders created on or before this date."
+        },
+        {
+          "name": "tx_hash",
+          "type": "string",
+          "optional": true,
+          "description": "Filter standing orders by a specific transaction hash."
+        },
+        {
+          "name": "limit",
+          "type": "number",
+          "optional": true,
+          "description": "Maximum number of standing orders to return."
+        },
+        {
+          "name": "cursor",
+          "type": "string",
+          "optional": true,
+          "description": "Pagination cursor for fetching the next page of results."
+        }
+      ]
+    },
+    {
+      "name": "StandingOrder",
+      "description": "Standing order data representing a recurring payment, including schedule, status, and remaining amount.",
+      "properties": [
+        {
+          "name": "id",
+          "type": "string",
+          "description": "Unique identifier for the standing order."
+        },
+        {
+          "name": "amount",
+          "type": "string",
+          "description": "Amount to transfer on each execution of the standing order."
+        },
+        {
+          "name": "currency",
+          "type": "string",
+          "description": "Currency code used for the standing order."
+        },
+        {
+          "name": "period",
+          "type": "StandingOrderFrequency",
+          "description": "Execution frequency for the standing order."
+        },
+        {
+          "name": "destinations",
+          "type": "string[]",
+          "description": "Array of destination addresses for the standing order."
+        },
+        {
+          "name": "status",
+          "type": "StandingOrderStatus",
+          "description": "Current status of the standing order."
+        },
+        {
+          "name": "remaining_amount",
+          "type": "string",
+          "description": "Remaining total amount that can still be executed under the standing order."
+        },
+        {
+          "name": "last_execution_date",
+          "type": "string",
+          "optional": true,
+          "description": "ISO 8601 date when the standing order last executed, if applicable."
+        },
+        {
+          "name": "next_execution_date",
+          "type": "string",
+          "description": "ISO 8601 date when the standing order is next scheduled to execute."
+        },
+        {
+          "name": "created_at",
+          "type": "string",
+          "description": "ISO 8601 timestamp when the standing order was created."
+        }
+      ]
+    },
+    {
+      "name": "GridClientSigner",
+      "description": "Client-side signer context used by the Grid SDK, representing a primary or backup signer with optional address, email, and session key information.",
+      "properties": [
+        {
+          "name": "address",
+          "type": "string",
+          "optional": true,
+          "description": "Optional signer address (for example a Solana public key)."
+        },
+        {
+          "name": "email",
+          "type": "string",
+          "optional": true,
+          "description": "Optional email address associated with the signer."
+        },
+        {
+          "name": "sessionKey",
+          "type": "any",
+          "optional": true,
+          "description": "Optional session key or provider-specific session data for this signer."
+        },
+        {
+          "name": "type",
+          "type": "\"primary\" | \"backup\"",
+          "description": "Type of signer, indicating whether this is a primary or backup signer."
+        },
+        {
+          "name": "provider",
+          "type": "SignerProvider",
+          "optional": true,
+          "description": "Optional authentication provider used by this signer."
+        }
+      ]
+    },
+    {
+      "name": "GridClientUserContext",
+      "description": "Client-side user context used by the Grid SDK, including account, user, signer, and session information.",
+      "properties": [
+        {
+          "name": "address",
+          "type": "string",
+          "optional": true,
+          "description": "Optional main account address for the user."
+        },
+        {
+          "name": "grid_user_id",
+          "type": "string",
+          "optional": true,
+          "description": "Optional Grid user ID."
+        },
+        {
+          "name": "signers",
+          "type": "GridClientSigner[]",
+          "optional": true,
+          "description": "Optional array of client signer contexts for this user."
+        },
+        {
+          "name": "session",
+          "type": "Session",
+          "optional": true,
+          "description": "Optional active authentication session for the user."
+        },
+        {
+          "name": "email",
+          "type": "string",
+          "optional": true,
+          "description": "Optional email address associated with the user."
+        },
+        {
+          "name": "otp_id",
+          "type": "string",
+          "optional": true,
+          "description": "Optional OTP identifier used during authentication flows."
+        },
+        {
+          "name": "provider",
+          "type": "string",
+          "optional": true,
+          "description": "Optional authentication provider for this user context."
+        }
+      ]
+    },
+    {
+      "name": "PrivyRefreshSession",
+      "description": "Privy-specific session data for refresh operations.",
+      "properties": [
+        {
+          "name": "user_id",
+          "type": "string",
+          "description": "Privy user identifier."
+        },
+        {
+          "name": "session",
+          "type": "Session",
+          "description": "Session data containing authorization keys and wallet information."
+        },
+        {
+          "name": "token",
+          "type": "string",
+          "description": "JWT token for Privy authentication."
+        },
+        {
+          "name": "privy_access_token",
+          "type": "string",
+          "description": "Privy platform access token."
+        },
+        {
+          "name": "refresh_token",
+          "type": "string",
+          "description": "Refresh token for obtaining new access tokens."
+        }
+      ]
+    },
+    {
+      "name": "TurnkeyRefreshSession",
+      "description": "Turnkey-specific session data for refresh operations. This matches the API’s Turnkey variant of the Session enum. Note: Turnkey refresh is not yet implemented in the API.",
+      "properties": [
+        {
+          "name": "user_id",
+          "type": "string",
+          "description": "Turnkey user identifier."
+        },
+        {
+          "name": "api_key_id",
+          "type": "string",
+          "description": "Turnkey API key identifier."
+        },
+        {
+          "name": "credential_bundle",
+          "type": "string",
+          "description": "Encrypted credential bundle for Turnkey operations."
+        }
+      ]
+    },
+    {
+      "name": "RefreshSessionKmsProvider",
+      "description": "KMS provider configuration for session refresh. The API returns both the provider string and the wrapped provider-specific session data.",
+      "properties": [
+        {
+          "name": "provider",
+          "type": "string",
+          "description": "The MPC provider type."
+        },
+        {
+          "name": "session",
+          "type": "ProviderSessionData",
+          "description": "Provider-specific session data wrapped by provider name."
+        }
+      ]
+    },
+    {
+      "name": "RefreshSessionRequest",
+      "description": "Request payload for refreshing an MPC provider session. Used to refresh authentication sessions for MPC providers like Privy, extending session lifetime and updating authorization keys.",
+      "properties": [
+        {
+          "name": "kms_payload",
+          "type": "RefreshSessionKmsProvider",
+          "description": "KMS provider configuration and wrapped provider session data."
+        },
+        {
+          "name": "encryption_public_key",
+          "type": "string",
+          "description": "HPKE public key used to encrypt the refresh session response."
+        }
+      ]
+    },
+    {
+      "name": "RefreshSessionResponse",
+      "description": "Response payload from session refresh operation. Contains updated session data with new authorization keys and tokens.",
+      "properties": [
+        {
+          "name": "kms_payload",
+          "type": "RefreshSessionKmsProvider",
+          "description": "Updated KMS provider configuration and session data."
+        }
+      ]
+    },
+    {
+      "name": "GridClientContext",
+      "description": "Grid client context grouping the low-level client configuration and the current user context.",
+      "properties": [
+        {
+          "name": "client",
+          "type": "ClientContext",
+          "description": "Low-level client configuration and environment context."
+        },
+        {
+          "name": "user",
+          "type": "GridClientUserContext",
+          "description": "Current user context including account, signers, and session data."
+        }
+      ]
+    },
+    {
+      "name": "CompleteAuthAndCreateAccountResponse",
+      "description": "Response returned after completing authentication and creating an account in a single flow.",
+      "properties": [
+        {
+          "name": "address",
+          "type": "string",
+          "description": "On-chain address of the created account."
+        },
+        {
+          "name": "status",
+          "type": "string",
+          "description": "Current status of the account."
+        },
+        {
+          "name": "policies",
+          "type": "AccountPolicies",
+          "description": "Account policies configuration for the created account."
+        },
+        {
+          "name": "grid_user_id",
+          "type": "string",
+          "description": "Grid user ID associated with the account."
+        },
+        {
+          "name": "authentication",
+          "type": "ProviderSessionData",
+          "description": "Provider authentication session data for the newly created account."
+        }
+      ]
+    },
+    {
+      "name": "SessionKey",
+      "description": "Session Key. Represents a generic session key with an expiration timestamp.",
+      "properties": [
+        {
+          "name": "key",
+          "type": "any",
+          "description": "The key."
+        },
+        {
+          "name": "expiration",
+          "type": "number",
+          "description": "The expiration."
+        }
+      ]
+    },
+    {
+      "name": "PasskeyRequest",
+      "description": "Passkey Request. Defines parameters required to initialize a passkey session, including environment, challenge, and session timing.",
+      "properties": [
+        {
+          "name": "env",
+          "type": "Env",
+          "description": "Environment in which the passkey request is made."
+        },
+        {
+          "name": "appName",
+          "type": "string",
+          "optional": true,
+          "description": "Optional application name shown in the passkey flow."
+        },
+        {
+          "name": "userId",
+          "type": "string",
+          "optional": true,
+          "description": "Optional user identifier for the passkey request."
+        },
+        {
+          "name": "redirectUrl",
+          "type": "string",
+          "optional": true,
+          "description": "Optional redirect URL after the passkey flow completes."
+        },
+        {
+          "name": "challenge",
+          "type": "string",
+          "description": "Challenge string that the passkey must sign."
+        },
+        {
+          "name": "slotNumber",
+          "type": "string",
+          "description": "Slot number used for the passkey session."
+        },
+        {
+          "name": "sessionKey",
+          "type": "string",
+          "description": "Session key associated with this passkey request."
+        },
+        {
+          "name": "expirationInSeconds",
+          "type": "string",
+          "description": "Expiration time in seconds for the passkey session."
+        }
+      ]
+    },
+    {
+      "name": "AuthorizePasskeySessionRequest",
+      "description": "Authorize Passkey Session Request. Contains the session key and metadata required to authorize a passkey session.",
+      "properties": [
+        {
+          "name": "sessionKey",
+          "type": "SessionKey",
+          "optional": true,
+          "description": "Optional session key associated with the passkey session."
+        },
+        {
+          "name": "metaInfo",
+          "type": "MetaInfo",
+          "description": "Metadata information required for passkey session authorization."
+        },
+        {
+          "name": "baseUrl",
+          "type": "string",
+          "optional": true,
+          "description": "Optional base URL used when authorizing the passkey session."
+        }
+      ]
+    },
+    {
+      "name": "AuthorizePasskeySessionResponse",
+      "description": "Authorize Passkey Session Response. Contains the URL where the user completes the passkey authorization flow.",
+      "properties": [
+        {
+          "name": "url",
+          "type": "string",
+          "description": "URL to redirect the user to for passkey session authorization."
+        }
+      ]
+    },
+    {
+      "name": "SubmitPasskeySessionRequest",
+      "description": "Submit Passkey Session Request. Contains the authenticator response and session metadata needed to complete a passkey ceremony.",
+      "properties": [
+        {
+          "name": "ceremonyType",
+          "type": "CeremonyType",
+          "description": "Type of passkey ceremony being performed (for example registration or authentication)."
+        },
+        {
+          "name": "sessionKey",
+          "type": "SessionKeyBackend",
+          "description": "Backend session key associated with this passkey ceremony."
+        },
+        {
+          "name": "slotNumber",
+          "type": "number",
+          "description": "Slot number used for the passkey session."
+        },
+        {
+          "name": "authenticatorResponse",
+          "type": "any",
+          "description": "Raw authenticator response returned from the WebAuthn/passkey ceremony."
+        }
+      ]
+    },
+    {
+      "name": "SubmitPasskeySessionResponse",
+      "description": "Submit Passkey Session Response. Contains the passkey account identifier and an updated session key after completing a passkey ceremony.",
+      "properties": [
+        {
+          "name": "passkey_account",
+          "type": "string",
+          "description": "Identifier of the passkey account that successfully completed the ceremony."
+        },
+        {
+          "name": "session_key",
+          "type": "SessionKey",
+          "description": "Updated session key associated with the passkey session."
+        }
+      ]
+    },
+    {
+      "name": "FindPasskeyAccountRequest",
+      "description": "Find Passkey Account Request. Contains the session key and authenticator response used to look up a passkey account.",
+      "properties": [
+        {
+          "name": "sessionKey",
+          "type": "SessionKey",
+          "description": "Session key associated with the passkey lookup request."
+        },
+        {
+          "name": "authenticatorResponse",
+          "type": "any",
+          "description": "Raw authenticator response returned from the passkey/WebAuthn flow."
+        }
+      ]
+    },
+    {
+      "name": "FindPasskeyAccountResponse",
+      "description": "Find Passkey Account Response. Contains the passkey account identifier and updated session key after a passkey lookup.",
+      "properties": [
+        {
+          "name": "passkey_account",
+          "type": "string",
+          "description": "Identifier of the passkey account that was found."
+        },
+        {
+          "name": "session_key",
+          "type": "SessionKey",
+          "description": "Updated session key associated with the passkey account."
+        }
+      ]
+    },
+    {
+      "name": "GetPasskeySessionResponse",
+      "description": "Get Passkey Session Response. Contains the raw provider-specific session object for an existing passkey session.",
+      "properties": [
+        {
+          "name": "session",
+          "type": "any",
+          "optional": true,
+          "description": "Optional provider-specific session data returned for the passkey session."
+        }
+      ]
+    },
+    {
+      "name": "PasskeyCredentialData",
+      "description": "Passkey Credential Data. Represents the core credential information for a passkey, including its identifier and public key.",
+      "properties": [
+        {
+          "name": "id",
+          "type": "ArrayBuffer",
+          "description": "Binary credential identifier as an ArrayBuffer."
+        },
+        {
+          "name": "publicKey",
+          "type": "string",
+          "description": "Public key associated with the passkey credential."
+        },
+        {
+          "name": "credentialId",
+          "type": "string",
+          "description": "String representation of the credential identifier."
+        }
+      ]
+    },
+    {
+      "name": "PasskeyAssertionResponse",
+      "description": "Passkey Assertion Response. Contains the WebAuthn assertion fields returned by the authenticator, including signature, client data, and authenticator data.",
+      "properties": [
+        {
+          "name": "response",
+          "type": "{ signature: string; clientDataJSON: string; authenticatorData: string; publicKey?: string; }",
+          "description": "Raw assertion response from the authenticator, including signature, clientDataJSON, authenticatorData, and an optional publicKey."
+        }
+      ]
+    }
+  ]
+  

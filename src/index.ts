@@ -36,9 +36,7 @@ class GridPayrollDemo {
     }
   }
 
-  // =============================================================================
-  // AUTHENTICATION METHODS - Following Grid SDK quickstart examples exactly
-  // =============================================================================
+
 
   private async showAuthMenu(): Promise<void> {
     while (true) {
@@ -226,9 +224,9 @@ class GridPayrollDemo {
     }
   }
 
-  // =============================================================================
+  
   // MAIN MENU AND SMART ACCOUNT METHODS
-  // =============================================================================
+ 
 
   private async showMainMenu(): Promise<void> {
     while (true) {

@@ -1,0 +1,295 @@
+[
+    {
+      "name": "GridEnvironment",
+      "description": "Grid API environment.",
+      "type": "\"sandbox\" | \"production\"",
+      "literals": [
+        {
+          "value": "sandbox",
+          "description": "Development and testing environment (Solana Devnet). [web:81]"
+        },
+        {
+          "value": "production",
+          "description": "Live production environment (Solana Mainnet). [web:81]"
+        }
+      ]
+    },
+    {
+      "name": "SpendingLimitPeriod",
+      "description": "Spending Limit Period. Defines how often a spending limit resets.",
+      "type": "\"one_time\" | \"daily\" | \"weekly\" | \"monthly\"",
+      "literals": [
+        {
+          "value": "one_time",
+          "description": "Spending limit can be used only once and does not reset. [web:82]"
+        },
+        {
+          "value": "daily",
+          "description": "Spending limit resets every day. [web:82]"
+        },
+        {
+          "value": "weekly",
+          "description": "Spending limit resets every week. [web:82]"
+        },
+        {
+          "value": "monthly",
+          "description": "Spending limit resets every month. [web:82]"
+        }
+      ]
+    },
+    {
+      "name": "PasskeyPermission",
+      "description": "Passkey Permission. Represents a permission string granted to a passkey.",
+      "type": "string",
+      "literals": []
+    },
+    {
+      "name": "SignerRole",
+      "description": "Role assigned to a signer in a multi-signature account. [web:84]",
+      "type": "\"primary\" | \"backup\"",
+      "literals": [
+        {
+          "value": "primary",
+          "description": "Primary signer role for an account. [web:84]"
+        },
+        {
+          "value": "backup",
+          "description": "Backup signer role for an account. [web:84]"
+        }
+      ]
+    },
+    {
+      "name": "SignerPermission",
+      "description": "Permissions that can be granted to signers in a multi-signature account. [web:85]",
+      "type": "\"CAN_INITIATE\" | \"CAN_EXECUTE\" | \"CAN_VOTE\"",
+      "literals": [
+        {
+          "value": "CAN_INITIATE",
+          "description": "Signer can initiate transactions. [web:85]"
+        },
+        {
+          "value": "CAN_EXECUTE",
+          "description": "Signer can execute approved transactions. [web:85]"
+        },
+        {
+          "value": "CAN_VOTE",
+          "description": "Signer can vote on pending transactions. [web:85]"
+        }
+      ]
+    },
+    {
+      "name": "CreateAccountRequest",
+      "description": "Full account creation request format sent to the Grid API. This is a discriminated union that supports email accounts, signer accounts, or direct account policies. [web:86]",
+      "type": "EmailAccountRequest | SignersAccountRequest | AccountPolicies",
+      "literals": []
+    },
+    {
+      "name": "CreateAccountResponse",
+      "description": "Union type representing the response from creating an account. The concrete type depends on the account creation method. [web:87]",
+      "type": "EmailAccountResponse | SignersAccountResponse",
+      "literals": []
+    },
+    {
+      "name": "KycType",
+      "description": "KYC Type. Indicates whether KYC is performed for an individual or a business. [web:88]",
+      "type": "\"individual\" | \"business\"",
+      "literals": [
+        {
+          "value": "individual",
+          "description": "KYC for an individual person. [web:88]"
+        },
+        {
+          "value": "business",
+          "description": "KYC for a business entity. [web:88]"
+        }
+      ]
+    },
+    {
+      "name": "KycEndorsement",
+      "description": "KYC Endorsement. Indicates which payment rails the KYC is endorsed for. [web:89]",
+      "type": "\"ach\" | \"sepa\"",
+      "literals": [
+        {
+          "value": "ach",
+          "description": "Endorsed for ACH (Automated Clearing House) transfers. [web:89]"
+        },
+        {
+          "value": "sepa",
+          "description": "Endorsed for SEPA (Single Euro Payments Area) transfers. [web:89]"
+        }
+      ]
+    },
+    {
+      "name": "Currency",
+      "description": "Currency used for fees and certain operations in the Grid API. [web:90]",
+      "type": "\"sol\" | \"usdc\" | \"usdt\" | \"pyusd\" | \"eurc\"",
+      "literals": [
+        {
+          "value": "sol",
+          "description": "Solana native currency (SOL). [web:90]"
+        },
+        {
+          "value": "usdc",
+          "description": "USD Coin on Solana. [web:90]"
+        },
+        {
+          "value": "usdt",
+          "description": "Tether USD on Solana. [web:90]"
+        },
+        {
+          "value": "pyusd",
+          "description": "PayPal USD stablecoin. [web:90]"
+        },
+        {
+          "value": "eurc",
+          "description": "Euro Coin stablecoin. [web:90]"
+        }
+      ]
+    },
+    {
+      "name": "TransferState",
+      "description": "State of a bridge or fiat transfer processed through Bridge payment rails. [web:91]",
+      "type": "\"awaiting_funds\" | \"in_review\" | \"funds_received\" | \"payment_submitted\" | \"payment_processed\" | \"canceled\" | \"error\" | \"undeliverable\" | \"returned\" | \"refunded\"",
+      "literals": [
+        {
+          "value": "awaiting_funds",
+          "description": "Transfer has been created and is waiting for funds to arrive from the source. [web:91]"
+        },
+        {
+          "value": "in_review",
+          "description": "Transfer is under compliance or risk review. [web:91]"
+        },
+        {
+          "value": "funds_received",
+          "description": "Funds have been received by the provider and are ready to be processed. [web:91]"
+        },
+        {
+          "value": "payment_submitted",
+          "description": "Payment has been submitted to the destination rail (e.g. bank network). [web:91]"
+        },
+        {
+          "value": "payment_processed",
+          "description": "Payment has been fully processed and completed. [web:91]"
+        },
+        {
+          "value": "canceled",
+          "description": "Transfer has been canceled and will not be processed. [web:91]"
+        },
+        {
+          "value": "error",
+          "description": "An error occurred while processing the transfer. [web:91]"
+        },
+        {
+          "value": "undeliverable",
+          "description": "Transfer could not be delivered to the destination. [web:91]"
+        },
+        {
+          "value": "returned",
+          "description": "Funds were returned by the destination institution. [web:91]"
+        },
+        {
+          "value": "refunded",
+          "description": "Transfer amount was refunded back to the sender. [web:91]"
+        }
+      ]
+    },
+    {
+      "name": "ConfirmationStatus",
+      "description": "Confirmation status of an on-chain transaction (for example SPL transfers). [web:92]",
+      "type": "\"pending\" | \"confirmed\"",
+      "literals": [
+        {
+          "value": "pending",
+          "description": "Transaction has been submitted but is not yet fully confirmed. [web:92]"
+        },
+        {
+          "value": "confirmed",
+          "description": "Transaction has been confirmed on-chain. [web:92]"
+        }
+      ]
+    },
+    {
+      "name": "TransferDirection",
+      "description": "Direction of a transfer relative to the main account (inbound or outbound). [web:93]",
+      "type": "\"inflow\" | \"outflow\"",
+      "literals": [
+        {
+          "value": "inflow",
+          "description": "Funds flowed into the main account. [web:93]"
+        },
+        {
+          "value": "outflow",
+          "description": "Funds flowed out of the main account. [web:93]"
+        }
+      ]
+    },
+    {
+      "name": "TransferResponse",
+      "description": "Union type representing either a Bridge transfer or an SPL token transfer. [web:94]",
+      "type": "BridgeTransfer | SplTransfer",
+      "literals": []
+    },
+    {
+      "name": "BridgeCurrency",
+      "description": "Fiat currency used for Bridge-based transfers and virtual accounts. [web:95]",
+      "type": "\"usd\" | \"eur\"",
+      "literals": [
+        {
+          "value": "usd",
+          "description": "United States Dollar. [web:95]"
+        },
+        {
+          "value": "eur",
+          "description": "Euro. [web:95]"
+        }
+      ]
+    },
+    {
+      "name": "PaymentRail",
+      "description": "Payment rail used for Bridge transfers, deposits, and withdrawals. [web:96]",
+      "type": "\"ach_push\" | \"ach_pull\" | \"sepa\" | \"faster_payments\" | \"wire\" | \"solana\" | \"smart_account\"",
+      "literals": [
+        {
+          "value": "ach_push",
+          "description": "ACH push transfer. [web:96]"
+        },
+        {
+          "value": "ach_pull",
+          "description": "ACH pull transfer. [web:96]"
+        },
+        {
+          "value": "sepa",
+          "description": "SEPA bank transfer. [web:96]"
+        },
+        {
+          "value": "faster_payments",
+          "description": "UK Faster Payments transfer. [web:96]"
+        },
+        {
+          "value": "wire",
+          "description": "Wire transfer. [web:96]"
+        },
+        {
+          "value": "solana",
+          "description": "Native Solana on-chain transfers. [web:96]"
+        },
+        {
+          "value": "smart_account",
+          "description": "Transfers via a Grid smart account. [web:96]"
+        }
+      ]
+    },
+    {
+      "name": "ProviderSessionData",
+      "description": "Provider session data as returned by the API. The API returns this as a discriminated union where the key is the provider name. [web:97]",
+      "type": "{ Privy: PrivyRefreshSession; } | { Turnkey: TurnkeyRefreshSession; }",
+      "literals": []
+    },
+    {
+      "name": "AuthenticationProvider",
+      "description": "Authentication provider information returned from auth completion endpoints. The API returns session data wrapped by provider type as a discriminated union (for example authentication: { \"Privy\": { ... } }). [web:98]",
+      "type": "ProviderSessionData",
+      "literals": []
+    }
+  ]
+  
