@@ -236,10 +236,12 @@ class GridPayrollDemo {
         'View Spending Limits (✅ Working)',
         'Create Spending Limit (✅ Working)',
         'Update Signature Threshold (✅ Working)',
+        'Simulate Receiving USDC Payroll Payment (💰 Demo)',
+        'Spend USDC Within Limits (💸 Demo)',
         'Exit'
       ]);
 
-      const choice = await this.console.question('Enter your choice (1-5): ');
+      const choice = await this.console.question('Enter your choice (1-7): ');
 
       switch (choice) {
         case '1':
@@ -255,6 +257,12 @@ class GridPayrollDemo {
           await this.updateSignatureThreshold();
           break;
         case '5':
+          await this.simulateReceivePayrollPayment();
+          break;
+        case '6':
+          await this.spendUSDCWithinLimits();
+          break;
+        case '7':
           this.console.printInfo('Goodbye!');
           return;
         default:
@@ -274,7 +282,7 @@ class GridPayrollDemo {
 
     try {
       this.console.printSeparator();
-      this.console.printInfo('📋 Smart Account Details');
+      this.console.printInfo('Smart Account Details');
       this.console.printSeparator();
 
       const accountData = this.authResult.data;
@@ -409,7 +417,7 @@ class GridPayrollDemo {
       const spendingLimits = spendingLimitsResponse.data;
 
       if (spendingLimits && spendingLimits.length > 0) {
-        this.console.printInfo(`📋 Found ${spendingLimits.length} spending limit(s):`);
+        this.console.printInfo(`Found ${spendingLimits.length} spending limit(s):`);
         
         spendingLimits.forEach((limit: any, index: number) => {
           this.console.printInfo(`\n${index + 1}. Spending Limit:`);
@@ -443,7 +451,7 @@ class GridPayrollDemo {
           }
         });
       } else {
-        this.console.printInfo('📋 No spending limits configured for this account');
+        this.console.printInfo('No spending limits configured for this account');
         this.console.printInfo('Use "Create Spending Limit" to set up spending controls');
       }
 
@@ -590,7 +598,7 @@ class GridPayrollDemo {
       this.console.printInfo('\nCurrent Account Configuration:');
       this.console.printInfo(`   📊 Signature Threshold: ${currentThreshold}`);
       this.console.printInfo(`   👥 Total Signers: ${signerCount}`);
-      this.console.printInfo(`   ℹ️  Currently requires ${currentThreshold} out of ${signerCount} signatures for transactions`);
+      this.console.printInfo(`   Currently requires ${currentThreshold} out of ${signerCount} signatures for transactions`);
 
       // Get new threshold from user
       this.console.printSeparator();
@@ -616,7 +624,7 @@ class GridPayrollDemo {
       }
 
       // Show what will change and ask for confirmation
-      this.console.printInfo(`\n🔄 Proposed Change:`);
+      this.console.printInfo(`\nProposed Change:`);
       this.console.printInfo(`   Current: ${currentThreshold}/${signerCount} signatures required`);
       this.console.printInfo(`   New: ${threshold}/${signerCount} signatures required`);
       
@@ -681,10 +689,577 @@ class GridPayrollDemo {
     await this.console.question('\nPress Enter to continue...');
   }
 
+  private async simulateReceivePayrollPayment(): Promise<void> {
+    if (!this.authResult || !this.authResult.data) {
+      this.console.printError('❌ No authenticated account found.');
+      this.console.printInfo('Please complete the login or signup process first.');
+      await this.console.question('Press Enter to continue...');
+      return;
+    }
+
+    try {
+      this.console.printSeparator();
+      this.console.printInfo('💰 Simulate Receiving USDC Payroll Payment');
+      this.console.printSeparator();
+
+      const accountAddress = this.authResult.data.address;
+      this.console.printSuccess(`🏦 Account: ${accountAddress}`);
+
+      // Show current balance first
+      this.console.printInfo('📊 Current Balance:');
+      const balanceResponse = await this.gridClient.getAccountBalances(accountAddress);
+      const currentUSDCBalance = this.extractUSDCBalance(balanceResponse.data);
+      this.console.printInfo(`   Current USDC: ${currentUSDCBalance} USDC`);
+
+      this.console.printSeparator();
+      this.console.printInfo('🏢 USDC Payroll Payment Simulation');
+      this.console.printInfo('Scenario: Your employer (TechCorp Inc.) is sending your monthly freelancer payment in USDC');
+
+      // Present payment amount options
+      this.console.printInfo('\nSelect payment amount:');
+      this.console.printInfo('1. 1,000 USDC');
+      this.console.printInfo('2. 2,500 USDC');
+      this.console.printInfo('3. 5,000 USDC');
+      this.console.printInfo('4. Custom amount');
+
+      const amountChoice = await this.console.question('Enter your choice (1-4): ');
+      let paymentAmount = 2500; // Default
+
+      switch (amountChoice) {
+        case '1':
+          paymentAmount = 1000;
+          break;
+        case '2':
+          paymentAmount = 2500;
+          break;
+        case '3':
+          paymentAmount = 5000;
+          break;
+        case '4':
+          const customAmount = await this.console.question('Enter amount in USDC: ');
+          paymentAmount = parseFloat(customAmount) || 2500;
+          break;
+        default:
+          this.console.printWarning('Invalid choice. Using default 2,500 USDC');
+      }
+
+      this.console.printSeparator();
+      this.console.printInfo('Processing Payment...');
+      
+      // Real Grid SDK code for monitoring incoming USDC transfers:
+      // const transfers = await this.gridClient.getTransfers(accountAddress);
+      // 
+      // // Check for new incoming payments:
+      // const incomingPayments = transfers.data.filter(tx => 
+      //   tx.direction === "inbound" && tx.confirmation_status === "confirmed"
+      // );
+
+      // Simulate payment processing delay
+      this.console.printInfo('\nSimulating payment processing...');
+      await this.sleep(2000);
+
+      // Generate mock payment details
+      const mockTransactionSignature = this.generateMockSignature();
+      const timestamp = new Date().toISOString();
+
+      // Show payment confirmation
+      this.console.printSuccess('\n✅ USDC Payment Received Successfully!');
+      this.console.printInfo('\nPayment Details:');
+      this.console.printInfo(`   From: TechCorp Inc. (Employer Wallet)`);
+      this.console.printInfo(`   Amount: ${paymentAmount} USDC`);
+      this.console.printInfo(`   Token: USDC (SPL Token)`);
+      this.console.printInfo(`   Transaction ID: ${mockTransactionSignature}`);
+      this.console.printInfo(`   Processed At: ${new Date(timestamp).toLocaleString()}`);
+
+      // Real Grid SDK code to check updated balance:
+      // const balanceResponse = await this.gridClient.getAccountBalances(accountAddress);
+      // const usdcBalance = balanceResponse.data.tokens.find(
+      //   token => token.symbol === "USDC"
+      // );
+      // console.log(`New USDC balance: ${usdcBalance.amount}`);
+
+      // Show updated balance
+      this.console.printSeparator();
+      this.console.printInfo('💰 Updated Balance:');
+      const newUSDCBalance = currentUSDCBalance + paymentAmount;
+      this.console.printInfo(`   Previous USDC: ${currentUSDCBalance} USDC`);
+      this.console.printSuccess(`   Current USDC: ${newUSDCBalance} USDC`);
+      this.console.printSuccess(`   Increase: +${paymentAmount} USDC`);
+
+      // Store the simulated balance for use in spending demo
+      if (!this.tempSessionData) {
+        this.tempSessionData = {};
+      }
+      this.tempSessionData.mockUSDCBalance = newUSDCBalance;
+
+      // Show recent transaction history
+      this.console.printSeparator();
+      this.console.printInfo('Recent Transaction History:');
+      await this.showMockTransactionHistory(accountAddress, {
+        type: 'incoming',
+        amount: paymentAmount,
+        signature: mockTransactionSignature,
+        timestamp: timestamp,
+        description: 'Payroll Payment from TechCorp Inc.'
+      });
+
+      this.console.printSeparator();
+      this.console.printInfo('Demo Note: This was a simulated USDC transfer for demonstration purposes.');
+      this.console.printInfo('In production, the employer would send real USDC from their wallet to yours');
+      this.console.printInfo('and the Grid SDK would track the incoming transfer on the Solana blockchain.');
+
+    } catch (error) {
+      this.console.printError(`Failed to simulate payment: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+
+    await this.console.question('\nPress Enter to continue...');
+  }
+
+  private extractUSDCBalance(balanceData: any): number {
+    if (!balanceData || !balanceData.tokens) {
+      return 0;
+    }
+    
+    const usdcToken = balanceData.tokens.find((token: any) => 
+      token.symbol === 'USDC' || 
+      token.mint === 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v'
+    );
+    
+    return usdcToken ? parseFloat(usdcToken.amount || '0') : 0;
+  }
+
+  private generateMockSignature(): string {
+    // Generate a realistic-looking Solana transaction signature
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    let result = '';
+    for (let i = 0; i < 88; i++) { // Solana signatures are ~88 characters
+      result += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return result;
+  }
+
+  private sleep(ms: number): Promise<void> {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
+  private async spendUSDCWithinLimits(): Promise<void> {
+    if (!this.authResult || !this.authResult.data) {
+      this.console.printError('❌ No authenticated account found.');
+      this.console.printInfo('Please complete the login or signup process first.');
+      await this.console.question('Press Enter to continue...');
+      return;
+    }
+
+    try {
+      this.console.printSeparator();
+      this.console.printInfo('💸 Spend USDC Within Configured Limits');
+      this.console.printSeparator();
+
+      const accountAddress = this.authResult.data.address;
+      this.console.printSuccess(`🏦 Account: ${accountAddress}`);
+
+      // Get current spending limits
+      this.console.printInfo('📊 Checking current spending limits...');
+      const spendingLimitsResponse = await this.gridClient.getSpendingLimits(accountAddress);
+      const spendingLimits = spendingLimitsResponse.data || [];
+
+      // Find USDC spending limits
+      const usdcLimits = spendingLimits.filter((limit: any) => 
+        limit.mint === 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v' || // USDC mainnet
+        limit.mint?.includes('USDC')
+      );
+
+      if (usdcLimits.length === 0) {
+        this.console.printWarning('⚠️ No USDC spending limits configured.');
+        this.console.printInfo('You may want to create a spending limit first for better security.');
+        this.console.printInfo('Proceeding with demo using simulated limits...');
+        
+        // Use mock spending limit for demo
+        await this.demonstrateSpendingWithMockLimits(accountAddress);
+        return;
+      }
+
+      // Display available spending limits
+      this.console.printInfo('\nAvailable USDC Spending Limits:');
+      usdcLimits.forEach((limit: any, index: number) => {
+        const periodTypes = ['One-time', 'Daily', 'Weekly', 'Monthly'];
+        this.console.printInfo(`\n${index + 1}. Spending Limit:`);
+        this.console.printInfo(`   Address: ${limit.address}`);
+        this.console.printInfo(`   Amount: ${limit.amount} USDC`);
+        this.console.printInfo(`   Remaining: ${limit.remaining_amount} USDC`);
+        this.console.printInfo(`   Period: ${periodTypes[limit.period] || 'Unknown'}`);
+        this.console.printInfo(`   Status: ${limit.status}`);
+      });
+
+      // Select spending limit to use
+      let selectedLimit = usdcLimits[0]; // Default to first one
+      if (usdcLimits.length > 1) {
+        const choice = await this.console.question(`\nSelect spending limit to use (1-${usdcLimits.length}): `);
+        const choiceIndex = parseInt(choice) - 1;
+        if (choiceIndex >= 0 && choiceIndex < usdcLimits.length) {
+          selectedLimit = usdcLimits[choiceIndex];
+        }
+      }
+
+      this.console.printSeparator();
+      this.console.printSuccess(`✅ Using spending limit: ${selectedLimit.address}`);
+      this.console.printInfo(`💰 Available to spend: ${selectedLimit.remaining_amount} USDC`);
+
+      // Get current balance (including any simulated balance)
+      const balanceResponse = await this.gridClient.getAccountBalances(accountAddress);
+      let currentUSDCBalance = this.extractUSDCBalance(balanceResponse.data);
+      
+      // Use simulated balance if available
+      if (this.tempSessionData?.mockUSDCBalance) {
+        currentUSDCBalance = this.tempSessionData.mockUSDCBalance;
+        this.console.printInfo(`💵 Current USDC Balance: ${currentUSDCBalance} USDC (includes simulated payment)`);
+      } else {
+        this.console.printInfo(`💵 Current USDC Balance: ${currentUSDCBalance} USDC`);
+      }
+
+      // Present spending scenarios
+      this.console.printSeparator();
+      this.console.printInfo('Select spending scenario:');
+      this.console.printInfo('1. Pay contractor ($500 USDC)');
+      this.console.printInfo('2. Swap USDC to SOL ($75 worth)');
+
+      const spendingChoice = await this.console.question('Enter your choice (1-2): ');
+      let spendAmount = 75;
+      let recipient = '';
+      let description = '';
+
+      switch (spendingChoice) {
+        case '1':
+          spendAmount = 500;
+          recipient = '9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM'; // Mock contractor address
+          description = 'Pay contractor for development work';
+          break;
+        case '2':
+          spendAmount = 75;
+          recipient = accountAddress; // User's own wallet for swap
+          description = 'Swap USDC to SOL';
+          break;
+        default:
+          this.console.printWarning('Invalid choice. Using default token swap.');
+          spendAmount = 75;
+          recipient = accountAddress; // User's own wallet for swap
+          description = 'Swap USDC to SOL';
+      }
+
+      // Validate spending constraints
+      this.console.printSeparator();
+      this.console.printInfo('🔍 Validating spending constraints...');
+      
+      const constraints = this.checkSpendingLimitConstraints(
+        spendAmount, 
+        currentUSDCBalance, 
+        selectedLimit
+      );
+
+      if (!constraints.canSpend) {
+        this.console.printError(`❌ Cannot process transaction: ${constraints.reason}`);
+        this.console.printInfo('\n💡 Suggestions:');
+        constraints.suggestions.forEach(suggestion => {
+          this.console.printInfo(`   • ${suggestion}`);
+        });
+        await this.console.question('\nPress Enter to continue...');
+        return;
+      }
+
+      this.console.printSuccess('✅ Transaction validates against spending limits');
+
+      // Real Grid SDK code that would be used in production:
+      if (description.includes('contractor')) {
+        // External payment using spending limit:
+        // const spendingLimitTx = await this.gridClient.useSpendingLimit(
+        //   accountAddress,
+        //   selectedLimit.address,
+        //   {
+        //     destination_address: recipient,
+        //     amount: spendAmount,
+        //     mint: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v' // USDC
+        //   }
+        // );
+        //
+        // // Sign and send the spending limit transaction:
+        // const signature = await this.gridClient.signAndSend({
+        //   sessionSecrets: this.sessionSecrets,
+        //   session: this.authResult.data.authentication,
+        //   transactionPayload: spendingLimitTx.data,
+        //   address: accountAddress
+        // });
+      } else {
+        // Token swap within spending limits:
+        // const spendingLimitTx = await this.gridClient.useSpendingLimit(
+        //   accountAddress,
+        //   selectedLimit.address,
+        //   {
+        //     destination_address: accountAddress, // Self for swap
+        //     amount: spendAmount,
+        //     mint: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v' // USDC
+        //   }
+        // );
+        //
+        // // For token swaps, prepare the swap transaction:
+        // const swapTx = await this.gridClient.prepareArbitraryTransaction(
+        //   accountAddress,
+        //   { transaction: serializedSwapTransaction }
+        // );
+        // const swapSignature = await this.gridClient.signAndSend({
+        //   sessionSecrets: this.sessionSecrets,
+        //   session: this.authResult.data.authentication,
+        //   transactionPayload: swapTx.data,
+        //   address: accountAddress
+        // });
+      }
+
+      // Simulate transaction processing
+      this.console.printSeparator();
+      this.console.printInfo('Processing transaction...');
+      await this.sleep(1500);
+
+      // Generate mock transaction details
+      const mockTxSignature = this.generateMockSignature();
+      const timestamp = new Date().toISOString();
+
+      // Show transaction success
+      this.console.printSuccess('\n✅ Transaction Completed Successfully!');
+      this.console.printInfo('\nTransaction Details:');
+      this.console.printInfo(`   Description: ${description}`);
+      this.console.printInfo(`   Amount: ${spendAmount} USDC`);
+      
+      if (description.includes('contractor')) {
+        this.console.printInfo(`   To: ${recipient} (External wallet)`);
+      } else {
+        this.console.printInfo(`   To: ${recipient} (Your wallet)`);
+        this.console.printInfo(`   Type: Token swap (USDC → SOL)`);
+        this.console.printInfo(`   Rate: ~166.67 USDC/SOL (example)`);
+      }
+      
+      this.console.printInfo(`   Transaction ID: ${mockTxSignature}`);
+      this.console.printInfo(`   Processed At: ${new Date(timestamp).toLocaleString()}`);
+
+      // Update balances
+      const newUSDCBalance = currentUSDCBalance - spendAmount;
+      const newRemainingLimit = selectedLimit.remaining_amount - spendAmount;
+
+      this.console.printSeparator();
+      this.console.printInfo('💰 Updated Balances:');
+      
+      if (description.includes('contractor')) {
+        this.console.printInfo(`   USDC Balance: ${currentUSDCBalance} → ${newUSDCBalance} USDC`);
+      } else {
+        // Show both USDC and SOL changes for swap
+        const solReceived = (spendAmount / 166.67).toFixed(3); // Example conversion
+        this.console.printInfo(`   USDC Balance: ${currentUSDCBalance} → ${newUSDCBalance} USDC (-${spendAmount})`);
+        this.console.printInfo(`   SOL Balance: ~${solReceived} SOL added (+${solReceived} SOL)`);
+      }
+      
+      this.console.printInfo(`   Spending Limit Remaining: ${selectedLimit.remaining_amount} → ${newRemainingLimit} USDC`);
+
+      // Update simulated balance
+      if (this.tempSessionData) {
+        this.tempSessionData.mockUSDCBalance = newUSDCBalance;
+      }
+
+      // Show recent transaction history
+      this.console.printSeparator();
+      this.console.printInfo('Recent Transaction History:');
+      await this.showMockTransactionHistory(accountAddress, {
+        type: 'outgoing',
+        amount: spendAmount,
+        signature: mockTxSignature,
+        timestamp: timestamp,
+        description: description,
+        recipient: recipient
+      });
+
+      this.console.printSeparator();
+      this.console.printInfo('Demo Note: This was a simulated transaction for demonstration purposes.');
+      this.console.printInfo('In production, the Grid SDK would create and sign the actual blockchain transaction');
+      this.console.printInfo('using the configured spending limit to enforce the transfer constraints.');
+
+    } catch (error) {
+      this.console.printError(`Failed to process transaction: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+
+    await this.console.question('\nPress Enter to continue...');
+  }
+
+  private async demonstrateSpendingWithMockLimits(accountAddress: string): Promise<void> {
+    this.console.printInfo('\n🔧 Creating mock spending limit for demonstration...');
+    
+    // Show what a real spending limit setup would look like
+    this.console.printInfo('\nProduction Code for Creating Spending Limit:');
+    this.console.printInfo('// const spendingLimit = await this.gridClient.createSpendingLimit(');
+    this.console.printInfo(`//   '${accountAddress}',`);
+    this.console.printInfo('//   {');
+    this.console.printInfo('//     amount: 1000,');
+    this.console.printInfo('//     mint: "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v", // USDC');
+    this.console.printInfo('//     period: "daily",');
+    this.console.printInfo('//     spending_limit_signers: [primarySignerAddress]');
+    this.console.printInfo('//   }');
+    this.console.printInfo('// );');
+
+    // Mock spending limit for demo
+    const mockLimit = {
+      address: 'SpL1m1tMockAddr3ssForD3m0nstrat10nPurp0s3s0nly',
+      amount: 1000,
+      remaining_amount: 750,
+      period: 1, // Daily
+      status: 'active',
+      mint: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v'
+    };
+
+    this.console.printInfo('\nMock Daily Spending Limit:');
+    this.console.printInfo(`   Address: ${mockLimit.address}`);
+    this.console.printInfo(`   Daily Limit: ${mockLimit.amount} USDC`);
+    this.console.printInfo(`   Remaining Today: ${mockLimit.remaining_amount} USDC`);
+    this.console.printInfo(`   Status: ${mockLimit.status}`);
+
+    // Continue with spending demo using mock limit
+    await this.sleep(1000);
+    this.console.printInfo('\n📱 Proceeding with spending demo...');
+  }
+
 
   // =============================================================================
   // HELPER METHODS
   // =============================================================================
+
+  private checkSpendingLimitConstraints(
+    spendAmount: number, 
+    currentBalance: number, 
+    spendingLimit: any
+  ): { canSpend: boolean; reason?: string; suggestions: string[] } {
+    const suggestions: string[] = [];
+
+    // Check if user has sufficient balance
+    if (spendAmount > currentBalance) {
+      return {
+        canSpend: false,
+        reason: 'Insufficient account balance',
+        suggestions: [
+          'Wait for incoming payments to clear',
+          'Reduce the transaction amount',
+          'Request additional funding from your employer'
+        ]
+      };
+    }
+
+    // Check if spending limit allows this amount
+    if (spendAmount > spendingLimit.remaining_amount) {
+      const periodTypes = ['one-time', 'daily', 'weekly', 'monthly'];
+      const periodName = periodTypes[spendingLimit.period] || 'period';
+      
+      return {
+        canSpend: false,
+        reason: `Exceeds ${periodName} spending limit`,
+        suggestions: [
+          `Reduce amount to ${spendingLimit.remaining_amount} USDC or less`,
+          `Wait for the ${periodName} limit to reset`,
+          'Create a new spending limit with higher amount',
+          'Contact account admin to modify spending limits'
+        ]
+      };
+    }
+
+    // Check if spending limit is active (handle quoted status from API)
+    const status = spendingLimit.status.replace(/"/g, ''); // Remove quotes if present
+    if (status !== 'active') {
+      return {
+        canSpend: false,
+        reason: `Spending limit is ${status}`,
+        suggestions: [
+          'Contact account admin to activate spending limit',
+          'Create a new active spending limit'
+        ]
+      };
+    }
+
+    // All checks passed
+    return {
+      canSpend: true,
+      suggestions: []
+    };
+  }
+
+  private async showMockTransactionHistory(
+    accountAddress: string, 
+    latestTransaction?: {
+      type: 'incoming' | 'outgoing';
+      amount: number;
+      signature: string;
+      timestamp: string;
+      description: string;
+      recipient?: string;
+    }
+  ): Promise<void> {
+    // Real Grid SDK code to get transfer history:
+    // const transfers = await this.gridClient.getTransfers(accountAddress);
+    
+    this.console.printInfo('\nRecent Transactions:');
+    
+    // Create mock transaction history
+    const mockTransactions = [
+      {
+        type: 'outgoing',
+        amount: 125.50,
+        description: 'Office supplies purchase',
+        recipient: 'OfficeMax Corp',
+        timestamp: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+        signature: 'AbC123...XyZ789'
+      },
+      {
+        type: 'incoming',
+        amount: 1500.00,
+        description: 'Payroll Payment from TechCorp Inc.',
+        timestamp: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
+        signature: 'DeF456...UvW012'
+      },
+      {
+        type: 'outgoing',
+        amount: 75.00,
+        description: 'Software license renewal',
+        recipient: 'Adobe Systems',
+        timestamp: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
+        signature: 'GhI789...StU345'
+      }
+    ];
+
+    // Add the latest transaction if provided
+    if (latestTransaction) {
+      mockTransactions.unshift({
+        type: latestTransaction.type,
+        amount: latestTransaction.amount,
+        description: latestTransaction.description,
+        recipient: latestTransaction.recipient || '',
+        timestamp: latestTransaction.timestamp,
+        signature: latestTransaction.signature.substring(0, 10) + '...' + latestTransaction.signature.substring(-6)
+      });
+    }
+
+    // Display transactions
+    mockTransactions.slice(0, 5).forEach((tx, index) => {
+      const date = new Date(tx.timestamp);
+      const direction = tx.type === 'incoming' ? '⬇️ IN' : '⬆️ OUT';
+      const amountColor = tx.type === 'incoming' ? '+' : '-';
+      
+      this.console.printInfo(`\n${index + 1}. ${direction}  ${date.toLocaleDateString()}`);
+      this.console.printInfo(`   Amount: ${amountColor}${tx.amount} USDC`);
+      this.console.printInfo(`   ${tx.description}`);
+      if (tx.recipient && tx.type === 'outgoing') {
+        this.console.printInfo(`   To: ${tx.recipient}`);
+      }
+      this.console.printInfo(`   TX: ${tx.signature}`);
+      
+      if (index === 0 && latestTransaction) {
+        this.console.printSuccess('   Latest Transaction');
+      }
+    });
+
+    this.console.printInfo(`\nShowing ${Math.min(mockTransactions.length, 5)} most recent transactions`);
+  }
 
   private async getFreelancerAccountInfo(): Promise<FreelancerAccount | null> {
     // This method will be implemented to extract real data from Grid SDK responses
