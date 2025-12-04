@@ -236,12 +236,14 @@ class GridPayrollDemo {
         'View Spending Limits (✅ Working)',
         'Create Spending Limit (✅ Working)',
         'Update Signature Threshold (✅ Working)',
-        'Simulate Receiving USDC Payroll Payment (💰 Demo)',
-        'Spend USDC Within Limits (💸 Demo)',
+        'Simulate Receiving USDC Payroll Payment (Demo)',
+        'Spend USDC Within Limits (Demo)',
+        'Create Multiple Freelancer Accounts (Sequential Demo)',
+        'Setup Automated Payroll System (Standing Orders Demo)',
         'Exit'
       ]);
 
-      const choice = await this.console.question('Enter your choice (1-7): ');
+      const choice = await this.console.question('Enter your choice (1-9): ');
 
       switch (choice) {
         case '1':
@@ -263,6 +265,12 @@ class GridPayrollDemo {
           await this.spendUSDCWithinLimits();
           break;
         case '7':
+          await this.createMultipleFreelancerAccounts();
+          break;
+        case '8':
+          await this.setupAutomatedPayroll();
+          break;
+        case '9':
           this.console.printInfo('Goodbye!');
           return;
         default:
@@ -1267,9 +1275,342 @@ class GridPayrollDemo {
     return null;
   }
 
-  // =============================================================================
-  // HELPER METHODS
-  // =============================================================================
+  private async createMultipleFreelancerAccounts(): Promise<void> {
+    if (!this.authResult || !this.authResult.data) {
+      this.console.printError('❌ No authenticated account found.');
+      this.console.printInfo('Please complete the login or signup process first.');
+      await this.console.question('Press Enter to continue...');
+      return;
+    }
+
+    try {
+      this.console.printSeparator();
+      this.console.printInfo('Create Multiple Freelancer Accounts');
+      this.console.printSeparator();
+
+      this.console.printInfo('This demonstration shows how to create multiple freelancer accounts sequentially.');
+      this.console.printInfo('Note: Each account requires individual OTP verification in production.');
+
+      // Get number of accounts to create
+      const accountCount = await this.console.promptForNumber(
+        'How many freelancer accounts would you like to create? (1-5): ', 
+        1, 
+        5
+      );
+
+      // Generate mock email addresses for demo
+      const freelancerEmails = [];
+      for (let i = 1; i <= accountCount; i++) {
+        freelancerEmails.push(`freelancer${i}@yourcompany.com`);
+      }
+
+      this.console.printSeparator();
+      this.console.printInfo(`Creating ${accountCount} freelancer accounts...`);
+
+      // Real Grid SDK implementation (commented for demo):
+      // const createdAccounts = [];
+      // 
+      // for (let i = 0; i < freelancerEmails.length; i++) {
+      //   const email = freelancerEmails[i];
+      //   this.console.printInfo(`Processing account ${i + 1} of ${freelancerEmails.length}: ${email}`);
+      //   
+      //   try {
+      //     // Step 1: Create account
+      //     this.console.printInfo('🔍 Calling Grid SDK: createAccount({ email })');
+      //     const response = await this.gridClient.createAccount({ email });
+      //     
+      //     // Step 2: Generate session secrets
+      //     this.console.printInfo('🔍 Calling Grid SDK: generateSessionSecrets()');
+      //     const sessionSecrets = await this.gridClient.generateSessionSecrets();
+      //     
+      //     // Step 3: OTP verification required
+      //     this.console.printWarning(`OTP verification required for ${email}`);
+      //     this.console.printInfo('In production: user checks email and provides OTP code');
+      //     
+      //     // Step 4: Complete account creation with OTP
+      //     // const otpCode = await this.console.question(`Enter OTP for ${email}: `);
+      //     // const authResult = await this.gridClient.completeAuthAndCreateAccount({
+      //     //   user: response.data,
+      //     //   otpCode,
+      //     //   sessionSecrets
+      //     // });
+      //     
+      //     createdAccounts.push({
+      //       email,
+      //       user: response.data,
+      //       sessionSecrets,
+      //       // address: authResult.data.address (after OTP verification)
+      //       status: 'pending_otp'
+      //     });
+      //     
+      //     this.console.printSuccess(`Account ${i + 1} initiated successfully`);
+      //     
+      //   } catch (error) {
+      //     this.console.printError(`Failed to create account for ${email}: ${error.message}`);
+      //   }
+      // }
+
+      // Mock demonstration
+      const createdAccounts = [];
+      for (let i = 0; i < freelancerEmails.length; i++) {
+        const email = freelancerEmails[i];
+        
+        this.console.printInfo(`Processing account ${i + 1} of ${freelancerEmails.length}: ${email}`);
+        
+        // Simulate API call delay
+        await this.sleep(800);
+        
+        // Simulate account creation
+        const mockAddress = this.generateMockAccountAddress();
+        
+        createdAccounts.push({
+          email,
+          address: mockAddress,
+          status: 'created',
+          gridUserId: `user_${Date.now()}_${i + 1}`
+        });
+        
+        this.console.printSuccess(`Account ${i + 1} created successfully`);
+        this.console.printInfo(`   Email: ${email}`);
+        this.console.printInfo(`   Smart Account Address: ${mockAddress}`);
+        this.console.printInfo(`   Status: Active`);
+      }
+
+      // Display summary
+      this.console.printSeparator();
+      this.console.printInfo('Account Creation Summary');
+      this.console.printSeparator();
+      
+      this.console.printInfo(`Total Accounts Created: ${createdAccounts.length}`);
+      this.console.printInfo('Account Details:');
+      
+      createdAccounts.forEach((account, index) => {
+        this.console.printInfo(`\n${index + 1}. ${account.email}`);
+        this.console.printInfo(`   Address: ${account.address}`);
+        this.console.printInfo(`   Status: ${account.status}`);
+      });
+
+      this.console.printSeparator();
+      this.console.printInfo('Production Notes:');
+      this.console.printInfo('• Each account requires individual OTP verification');
+      this.console.printInfo('• Consider batch onboarding workflows for efficiency');
+      this.console.printInfo('• Accounts can be configured with spending limits and policies');
+      this.console.printInfo('• Use these accounts for automated payroll distribution');
+
+    } catch (error) {
+      this.console.printError(`Failed to create multiple accounts: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+
+    await this.console.question('\nPress Enter to continue...');
+  }
+
+  private async setupAutomatedPayroll(): Promise<void> {
+    if (!this.authResult || !this.authResult.data) {
+      this.console.printError('❌ No authenticated account found.');
+      this.console.printInfo('Please complete the login or signup process first.');
+      await this.console.question('Press Enter to continue...');
+      return;
+    }
+
+    try {
+      this.console.printSeparator();
+      this.console.printInfo('Setup Automated Payroll System');
+      this.console.printSeparator();
+
+      const mainAccountAddress = this.authResult.data.address;
+      this.console.printSuccess(`Company Account: ${mainAccountAddress}`);
+
+      this.console.printInfo('\nThis feature demonstrates setting up automated recurring payroll');
+      this.console.printInfo('using Grid SDK Standing Orders for multiple freelancers.');
+
+      // Mock freelancer accounts for demo
+      const mockFreelancers = [
+        { email: 'alice@freelancer.com', address: '8WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM', monthlyRate: '3000' },
+        { email: 'bob@freelancer.com', address: '9XaEYzCcmkg9ZUcOMrVyxRRAyrZzDsGYdLVL9zYtBXXN', monthlyRate: '2500' },
+        { email: 'charlie@freelancer.com', address: '7VbFZzDdnlh7ZVdPNsWzzSRAyrZzDsGYdLVL9zYtCYYO', monthlyRate: '2800' }
+      ];
+
+      this.console.printSeparator();
+      this.console.printInfo('Freelancer Accounts for Payroll Setup:');
+      
+      mockFreelancers.forEach((freelancer, index) => {
+        this.console.printInfo(`\n${index + 1}. ${freelancer.email}`);
+        this.console.printInfo(`   Address: ${freelancer.address}`);
+        this.console.printInfo(`   Monthly Rate: ${freelancer.monthlyRate} USDC`);
+      });
+
+      // Payroll frequency options
+      this.console.printSeparator();
+      this.console.printInfo('Select payroll frequency:');
+      this.console.printInfo('1. Monthly (1st of each month)');
+      this.console.printInfo('2. Bi-weekly (Every 2 weeks)');
+      this.console.printInfo('3. Weekly (Every week)');
+
+      const frequencyChoice = await this.console.question('Select frequency (1-3): ');
+      const frequencyMap = {
+        '1': { name: 'monthly', description: 'Monthly on 1st' },
+        '2': { name: 'bi_weekly', description: 'Every 2 weeks' },
+        '3': { name: 'weekly', description: 'Every week' }
+      };
+      
+      const selectedFrequency = frequencyMap[frequencyChoice as keyof typeof frequencyMap] || frequencyMap['1'];
+
+      this.console.printSeparator();
+      this.console.printInfo(`Setting up ${selectedFrequency.description} automated payroll...`);
+
+      // Real Grid SDK implementation for Standing Orders (commented for demo):
+      // const standingOrderResults = [];
+      // 
+      // for (let i = 0; i < mockFreelancers.length; i++) {
+      //   const freelancer = mockFreelancers[i];
+      //   this.console.printInfo(`Creating standing order ${i + 1} of ${mockFreelancers.length}: ${freelancer.email}`);
+      //   
+      //   try {
+      //     const standingOrder = await this.gridClient.createStandingOrder(
+      //       mainAccountAddress,
+      //       {
+      //         amount: freelancer.monthlyRate,
+      //         grid_user_id: this.authResult.data.grid_user_id,
+      //         source: {
+      //           account: mainAccountAddress,
+      //           currency: "USDC",
+      //           payment_rail: "solana"
+      //         },
+      //         destination: {
+      //           account: freelancer.address,
+      //           currency: "USDC",
+      //           payment_rail: "solana"
+      //         },
+      //         frequency: selectedFrequency.name,
+      //         start_date: new Date().toISOString(),
+      //         end_date: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString() // 1 year
+      //       }
+      //     );
+      //     
+      //     standingOrderResults.push({
+      //       freelancer: freelancer.email,
+      //       amount: freelancer.monthlyRate,
+      //       frequency: selectedFrequency.name,
+      //       standingOrderId: standingOrder.data.id,
+      //       status: 'active'
+      //     });
+      //     
+      //     this.console.printSuccess(`Standing order created for ${freelancer.email}`);
+      //     
+      //   } catch (error) {
+      //     this.console.printError(`Failed to create standing order for ${freelancer.email}: ${error.message}`);
+      //     standingOrderResults.push({
+      //       freelancer: freelancer.email,
+      //       status: 'failed',
+      //       error: error.message
+      //     });
+      //   }
+      // }
+
+      // Mock demonstration
+      const standingOrderResults = [];
+      for (let i = 0; i < mockFreelancers.length; i++) {
+        const freelancer = mockFreelancers[i];
+        
+        this.console.printInfo(`Creating standing order ${i + 1} of ${mockFreelancers.length}: ${freelancer.email}`);
+        
+        // Simulate API call delay
+        await this.sleep(1000);
+        
+        const mockStandingOrderId = `so_${Date.now()}_${i + 1}`;
+        
+        standingOrderResults.push({
+          freelancer: freelancer.email,
+          amount: freelancer.monthlyRate,
+          frequency: selectedFrequency.name,
+          standingOrderId: mockStandingOrderId,
+          status: 'active',
+          nextPayment: this.getNextPaymentDate(selectedFrequency.name)
+        });
+        
+        this.console.printSuccess(`Standing order created for ${freelancer.email}`);
+        this.console.printInfo(`   Amount: ${freelancer.monthlyRate} USDC`);
+        this.console.printInfo(`   Frequency: ${selectedFrequency.description}`);
+        this.console.printInfo(`   Standing Order ID: ${mockStandingOrderId}`);
+      }
+
+      // Display summary
+      this.console.printSeparator();
+      this.console.printInfo('Automated Payroll Setup Complete');
+      this.console.printSeparator();
+      
+      this.console.printInfo(`Total Standing Orders Created: ${standingOrderResults.length}`);
+      this.console.printInfo(`Payment Frequency: ${selectedFrequency.description}`);
+      
+      let totalMonthlyPayroll = 0;
+      this.console.printInfo('\nPayroll Schedule:');
+      
+      standingOrderResults.forEach((result, index) => {
+        this.console.printInfo(`\n${index + 1}. ${result.freelancer}`);
+        this.console.printInfo(`   Amount: ${result.amount} USDC`);
+        this.console.printInfo(`   Status: ${result.status}`);
+        this.console.printInfo(`   Next Payment: ${result.nextPayment}`);
+        this.console.printInfo(`   Standing Order ID: ${result.standingOrderId}`);
+        
+        totalMonthlyPayroll += parseFloat(result.amount);
+      });
+
+      this.console.printSeparator();
+      this.console.printInfo(`Total Monthly Payroll: ${totalMonthlyPayroll} USDC`);
+      
+      this.console.printSeparator();
+      this.console.printInfo('Automation Benefits:');
+      this.console.printInfo('✓ Payments execute automatically on schedule');
+      this.console.printInfo('✓ No manual intervention required');
+      this.console.printInfo('✓ Consistent payment timing for freelancers');
+      this.console.printInfo('✓ Reduced administrative overhead');
+      this.console.printInfo('✓ Full audit trail of all payments');
+
+      this.console.printSeparator();
+      this.console.printInfo('Management Options:');
+      this.console.printInfo('• View all standing orders: getStandingOrders()');
+      this.console.printInfo('• Pause/resume payments as needed');
+      this.console.printInfo('• Update payment amounts or schedules');
+      this.console.printInfo('• Cancel standing orders when contracts end');
+
+    } catch (error) {
+      this.console.printError(`Failed to setup automated payroll: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+
+    await this.console.question('\nPress Enter to continue...');
+  }
+
+  
+
+  private generateMockAccountAddress(): string {
+    // Generate a realistic-looking Solana address for demo
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    let result = '';
+    for (let i = 0; i < 44; i++) { // Solana addresses are 44 characters
+      result += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return result;
+  }
+
+  private getNextPaymentDate(frequency: string): string {
+    const now = new Date();
+    let nextPayment = new Date(now);
+
+    switch (frequency) {
+      case 'weekly':
+        nextPayment.setDate(now.getDate() + 7);
+        break;
+      case 'bi_weekly':
+        nextPayment.setDate(now.getDate() + 14);
+        break;
+      case 'monthly':
+      default:
+        nextPayment.setMonth(now.getMonth() + 1, 1); // First of next month
+        break;
+    }
+
+    return nextPayment.toLocaleDateString();
+  }
 
   // Direct access to GridClient for advanced operations (if needed later)
   getGridClient(): GridClient {
